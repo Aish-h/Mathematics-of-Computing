@@ -1,0 +1,95 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{array}
+
+\title{Assignment 2: Design Your Dream Logo \\ \large Logo Name: \textbf{Zenith Orbit}}
+\author{Aishwarya J S}
+\date{August 6, 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Concept}
+\textbf{Zenith Orbit} is an imaginary technology company. The logo is a radiating
+sun/orbit emblem built from two concentric circles, eight symmetric rays, a curved
+base arc, a small crown accent, and a wavy underline. The design is built around a
+single \textbf{vertical mirror axis} ($x=0$).
+
+\section*{Equations Used (16 total, exactly as built in Desmos)}
+
+\begin{center}
+\begin{tabular}{@{}clll@{}}
+\toprule
+\# & Equation (as entered in Desmos) & Type & Represents \\
+\midrule
+1  & $x^2+y^2=20.25$                                     & Circle        & Outer ring boundary \\
+2  & $x^2+y^2=5.35$                                       & Circle        & Core boundary \\
+3  & $x^2+y^2 \le 5.29$                                   & Circle (ineq.) & Core fill (color) \\
+4  & $x^2+y^2 \le 10.24 \ \{x^2+y^2 \ge 5.29\}$           & Circle (ineq.) & Ring band fill (color) \\
+5  & $y=x,\ \{1.8\le x\le 2.8\}$                          & Linear        & Ray, upper-right \\
+6  & $y=-x,\ \{1.8\le x\le 2.8\}$                         & Linear        & Ray, lower-right \\
+7  & $y=x,\ \{-2.8\le x\le -1.8\}$                        & Linear        & Ray, lower-left \\
+8  & $y=-x,\ \{-2.8\le x\le -1.8\}$                       & Linear        & Ray, upper-left \\
+9  & $x=0,\ \{2.3\le y\le 3.6\}$                          & Linear        & Ray, top \\
+10 & $x=0,\ \{-3.6\le y\le -2.3\}$                        & Linear        & Ray, bottom \\
+11 & $y=0,\ \{2.3\le x\le 3.6\}$                          & Linear        & Ray, right \\
+12 & $y=0,\ \{-3.6\le x\le -2.3\}$                        & Linear        & Ray, left \\
+13 & $y=-0.09x^2-4.35,\ \{-3\le x\le 3\}$                 & Quadratic     & Base arc \\
+14 & $y=x+7.1,\ \{-0.8\le x\le 0\}$                       & Linear        & Crown, left side \\
+15 & $y=-x+7.1,\ \{0\le x\le 0.8\}$                       & Linear        & Crown, right side (mirror of \#14) \\
+16 & $y=0.10\sin(2x)-6.2,\ \{-3\le x\le 3\}$              & Trigonometric & Wavy underline \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Function types present:} circle, linear, quadratic, and
+trigonometric (4 types). \textit{Note: this set does not currently include an
+absolute value equation, so it falls one short of a 5-type minimum if that is
+required — an easy fix is adding one small absolute-value crown or accent curve.}
+Inequalities (\#3, \#4) shade the core and ring band with color. Symmetry is
+clearly visible: rays \#5/\#8 and \#6/\#7 are mirror pairs across the vertical axis,
+rays \#11/\#12 mirror each other, and the crown lines \#14/\#15 form a symmetric
+peak. Both circles (\#1, \#2) and the quadratic base arc (\#13) are automatically
+symmetric about the $y$-axis since they contain only $x^2$ terms.
+
+\section*{Mathematics Behind the Design}
+The logo is anchored by two concentric circles, $x^2+y^2=20.25$ and
+$x^2+y^2=5.35$, which are inherently symmetric under any rotation since they depend
+only on $x^2+y^2$; the inequalities \#3 and \#4 shade the core and the ring band
+between them without needing any extra curves. The eight rays come from just four
+lines -- $y=x$, $y=-x$, $x=0$, and $y=0$ -- each restricted to a short interval on
+both sides of the origin, so domain restrictions turn four infinite lines into
+eight finite, evenly spaced spokes. The crown was built from two ordinary linear
+pieces, $y=x+7.1$ and $y=-x+7.1$, placed on mirrored domains so they meet at a
+single peak and form a V-shape without using an absolute value function. The
+quadratic base arc, $y=-0.09x^2-4.35$, curves gently because its coefficient is
+small and negative, and being a pure $x^2$ expression it is automatically
+symmetric. The sine wave underline adds a repeating, flowing accent that none of
+the other function types could produce on their own.
+
+\section*{Explanation}
+This logo uses four different types of mathematical functions: linear, quadratic,
+circular, and trigonometric functions. Circle equations formed the outer ring and
+core, linear equations built all eight rays, the two-sided crown, and were
+restricted with domains to keep them as short segments instead of infinite lines,
+the quadratic function created the curved base arc, and a sine function produced
+the wavy underline. Inequalities were used on the two circle equations to shade
+the core and the ring band with distinct colors. The main challenge was getting
+the domain restrictions on each ray to line up exactly with the circle radii, so
+the rays appeared to start right at the edge of the ring instead of overlapping it
+or leaving a gap. I also had to adjust the crown's two linear pieces carefully so
+they met at a single point. During this assignment, I learned how restricting the
+domain of ordinary lines can produce complex radial symmetry, and how inequalities
+can shade regions between two curves.
+
+\section*{Screenshot of the Desmos Graph}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{desmos-logo.png}
+\end{center}
+
+  \item \textbf{Desmos Graph Link:https://www.desmos.com/calculator/n59iwstno2} 
+
+\end{document}
