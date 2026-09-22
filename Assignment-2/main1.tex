@@ -1,0 +1,1288 @@
+\documentclass[11pt,aspectratio=169]{beamer}
+
+% ============================================================
+%  MODULE: Descriptive Statistics & Frequentist Statistics
+%  Detailed, plain-style study notes (no colour boxes)
+%  Includes expanded content + full speaker notes on every slide
+% ============================================================
+
+\usetheme{default}
+\usecolortheme{dove}          % grayscale, plain, no colour highlight boxes
+\setbeamertemplate{blocks}[default]   % plain framed blocks, no coloured fill
+\setbeamercolor{block title}{bg=white,fg=black}
+\setbeamercolor{block body}{bg=white,fg=black}
+\setbeamercolor{frametitle}{bg=white,fg=black}
+\setbeamercolor{title}{bg=white,fg=black}
+\setbeamercolor{structure}{fg=black}
+\setbeamertemplate{itemize items}[default]
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{booktabs}
+
+\title[Descriptive \& Frequentist Statistics]{Descriptive Statistics and Frequentist Statistics}
+\subtitle{Module 3}
+\author{Aishwarya J S}
+
+
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Bias}{\operatorname{Bias}}
+\newcommand{\MSE}{\operatorname{MSE}}
+\newcommand{\E}{\operatorname{\mathbb{E}}}
+\newcommand{\Xbar}{\bar{X}}
+
+% Use plain \paragraph-style headers instead of coloured blocks
+\newcommand{\Def}[1]{\textbf{Definition.} #1}
+\newcommand{\Note}[1]{\textbf{Note.} #1}
+\newcommand{\Res}[1]{\textbf{Result.} #1}
+\newcommand{\Ex}[1]{\textbf{Example.} #1}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\note{Title slide. This deck is the full module: Descriptive Statistics
+(histogram, mean/variance, order statistics, covariance, covariance matrix)
+and Frequentist Statistics (sampling, MSE, consistency, confidence
+intervals, parametric and non-parametric estimation). Every slide's speaker
+note repeats and extends the on-slide content so this can be read as a
+stand-alone study document, not just a slide skeleton.}
+\end{frame}
+
+\begin{frame}{Module Outline}
+\tableofcontents
+\note{Two main sections. Descriptive statistics is about summarizing data
+you already have, with no reference to an underlying random model beyond
+what is needed to justify formulas. Frequentist statistics is about using a
+sample to infer properties of an assumed underlying population/model, under
+the interpretation that probability is long-run frequency and the unknown
+parameter is a fixed constant, not a random variable.}
+\end{frame}
+
+% ============================================================
+\section{Descriptive Statistics}
+% ============================================================
+
+\begin{frame}{What is Descriptive Statistics?}
+\Def{Descriptive statistics summarizes and organizes the features of a data
+set using numerical measures, tables, and graphs, without drawing
+conclusions that go beyond the observed data.}
+
+\begin{itemize}
+    \item Goal: describe \textbf{center}, \textbf{spread}, \textbf{shape},
+          and \textbf{relationships}.
+    \item Graphical summaries: histogram, boxplot, scatterplot, stem-and-leaf
+          plot, bar chart, pie chart.
+    \item Numerical summaries: mean, median, mode, variance, standard
+          deviation, order statistics, covariance, correlation.
+    \item Descriptive statistics makes \emph{no probabilistic claim} about a
+          population; it only reports what is present in the sample.
+          Contrast this with inferential (frequentist) statistics, where we
+          use the sample to say something about a population we have not
+          fully observed.
+\end{itemize}
+\note{Key exam point: descriptive vs.\ inferential distinction. Descriptive
+statistics can be computed on a finite, fixed data set with no assumptions
+about randomness at all — e.g.\ you can describe the marks of exactly the
+30 students in a class without any probability model. Frequentist/inferential
+statistics requires you to view the data as one realization of a random
+sample from a larger population, and it is this second view that lets you
+attach a sampling distribution, standard error, or confidence interval to a
+statistic. Also note the four descriptive dimensions (center, spread,
+shape, relationship) — most exam questions map directly onto one of these
+four.}
+\end{frame}
+
+% ---------------- HISTOGRAM ----------------
+\subsection{Histogram}
+
+\begin{frame}{Histogram: Definition and Construction}
+\Def{A histogram is a graphical estimate of the distribution of a
+numerical variable, built by (1) partitioning the range of the data into
+contiguous bins, (2) counting the number of observations in each bin, and
+(3) drawing bars whose \emph{area} is proportional to that count.}
+
+For equal-width bins of width $h$, the \textbf{density-scaled} height is
+\[
+      \hat{f}(x) = \frac{n_i}{n h}, \qquad x \in [a_{i-1}, a_i)
+\]
+so that the total area under the histogram is exactly $1$, mimicking a
+probability density function.
+
+\Note{A frequency histogram (raw counts on the $y$-axis) and a density
+histogram (as above) have the same shape; only the vertical scale differs.
+Density scaling is what allows the histogram to be compared directly with a
+theoretical pdf overlay.}
+\note{Walk through the three-step construction slowly: choose bins, count,
+draw. Emphasize that "area proportional to frequency" is the defining
+property, not "height proportional to frequency" — this only coincides
+with height when all bins have equal width, which is the usual case in
+practice but not a requirement. If bins have unequal widths, you MUST
+scale by width or the picture is visually misleading (larger bins would
+look artificially tall). This is a classic exam trap.}
+\end{frame}
+
+\begin{frame}{Histogram: Choice of Bin Width}
+Bin choice is a bias--variance trade-off:
+\begin{itemize}
+    \item Too few bins (wide $h$) $\Rightarrow$ \textbf{oversmoothed}, hides
+          real structure (multi-modality, skew) — high bias.
+    \item Too many bins (narrow $h$) $\Rightarrow$ \textbf{noisy/spiky} —
+          high variance, dominated by sampling noise.
+\end{itemize}
+
+Common automatic rules ($n$ = sample size, $s$ = sample std.\ dev., IQR =
+interquartile range):
+\[
+    \text{Sturges: } k = \lceil \log_2 n \rceil + 1
+    \qquad\qquad
+    \text{Scott: } h = \frac{3.49\,s}{n^{1/3}}
+\]
+\[
+    \text{Freedman--Diaconis: } h = \frac{2\,\text{IQR}}{n^{1/3}}
+\]
+
+\Note{Freedman--Diaconis is the most robust of the three because IQR is
+insensitive to outliers, whereas Scott's rule (which uses $s$) can be
+badly distorted by even one extreme observation.}
+\note{Sturges' rule targets a specific number of bins $k$; Scott's and
+Freedman--Diaconis target a bin width $h$ directly, and you convert to $k$
+via $k = \lceil \text{range}/h \rceil$. Sturges assumes roughly normal data
+and under-bins for large, non-normal, or heavy-tailed data sets — this is
+a common critique to mention in an exam answer. All three rules scale bin
+width down as $n^{-1/3}$: more data supports finer bins, but only at a
+slow cube-root rate.}
+\end{frame}
+
+\begin{frame}{Histogram as a Non-Parametric Density Estimator}
+\begin{itemize}
+  \item The histogram is the simplest \textbf{non-parametric density
+        estimator}: it estimates the unknown pdf $f(x)$ using only the data,
+        with no assumed functional form for $f$.
+  \item For a fixed bin $[a_{i-1},a_i)$ with true probability
+        $p_i = \int_{a_{i-1}}^{a_i} f(x)\,dx$, the count $n_i$ is Binomial$(n,p_i)$, so
+        $\hat f(x) = n_i/(nh)$ is unbiased for $p_i/h$ (an average of $f$
+        over the bin, not exactly $f(x)$ at a point).
+  \item \textbf{Consistency} of the histogram as an estimator of $f$
+        requires both $h \to 0$ \emph{and} $nh \to \infty$ as
+        $n \to \infty$: bins must shrink (to reduce bias) but still contain
+        enough points on average (to reduce variance).
+\end{itemize}
+\note{This slide connects descriptive statistics to the later
+non-parametric estimation section. Emphasize the two competing limits:
+$h\to 0$ alone is not enough, because as bins shrink, the expected count
+per bin $np_i \approx nhf(x)$ would shrink too and the estimate would
+become pure noise; you additionally need $nh\to\infty$ so that the number
+of points per bin still grows. Kernel density estimation, covered later, is
+the smooth generalization of exactly this idea — it replaces the rigid
+box-shaped bin membership indicator with a smooth kernel.}
+\end{frame}
+
+% ---------------- SAMPLE MEAN AND VARIANCE ----------------
+\subsection{Sample Mean and Variance}
+
+\begin{frame}{Sample Mean}
+Let $X_1,\dots,X_n$ be a random sample from a population with mean $\mu$
+and variance $\sigma^2$.
+\[
+    \Xbar = \frac{1}{n}\sum_{i=1}^{n} X_i
+\]
+
+Properties:
+\begin{itemize}
+    \item \textbf{Unbiased}: $\E[\Xbar] = \mu$.
+    \item \textbf{Variance}: $\Var(\Xbar) = \sigma^2/n$ — shrinks as $n$
+          grows, so $\Xbar$ becomes more precise with more data.
+    \item \textbf{Law of Large Numbers (LLN)}: $\Xbar \xrightarrow{P} \mu$
+          as $n \to \infty$.
+    \item \textbf{Central Limit Theorem (CLT)}:
+          $\sqrt{n}(\Xbar-\mu) \xrightarrow{d} N(0,\sigma^2)$, so for large
+          $n$, $\Xbar \approx N(\mu, \sigma^2/n)$ \emph{regardless of the
+          shape of the original population distribution}.
+\end{itemize}
+\note{The CLT is the single most important theorem underlying the entire
+frequentist section: it is why we can use normal- or $t$-based confidence
+intervals even when the underlying population is not normal, as long as
+$n$ is reasonably large. Contrast: if the population itself IS normal, then
+$\Xbar$ is exactly (not just approximately) normal for every $n$, even
+$n=1$. Also mention: variance of $\Xbar$ decreasing like $1/n$ means
+standard error (its square root) decreases like $1/\sqrt n$ — to halve the
+standard error you need four times the data, a very commonly tested fact.}
+\end{frame}
+
+\begin{frame}{Sample Variance}
+\[
+    S^2 = \frac{1}{n-1}\sum_{i=1}^n (X_i - \Xbar)^2
+    = \frac{1}{n-1}\left(\sum_{i=1}^n X_i^2 - n \Xbar^2\right)
+\]
+
+\begin{itemize}
+    \item Dividing by $n-1$ (\textbf{Bessel's correction}) makes $S^2$
+          \textbf{unbiased}: $\E[S^2] = \sigma^2$.
+    \item The ``plug-in''/MLE-style version divides by $n$ instead:
+    \[
+        \hat\sigma^2 = \frac{1}{n}\sum_{i=1}^n (X_i-\Xbar)^2 = \frac{n-1}{n}S^2,
+        \qquad \E[\hat\sigma^2] = \frac{n-1}{n}\sigma^2 \ \ (\text{biased low})
+    \]
+    \item $n-1$ = \textbf{degrees of freedom} remaining after estimating
+          $\mu$ with $\Xbar$.
+\end{itemize}
+
+\textbf{Why $n-1$?} The deviations satisfy $\sum_i (X_i-\Xbar)=0$, so only
+$n-1$ of them are free to vary once $\Xbar$ is fixed; using $\Xbar$ (which
+is, on average, closer to each $X_i$ than the unknown true $\mu$ is) makes
+$\sum(X_i-\Xbar)^2$ systematically smaller than $\sum(X_i-\mu)^2$, and
+dividing by the smaller number $n-1$ exactly compensates.
+\note{Be ready to reproduce the short algebraic proof that
+E[sum (Xi - Xbar)^2] = (n-1) sigma^2: expand
+sum(Xi-mu)^2 = sum(Xi - Xbar + Xbar - mu)^2 and use that
+sum(Xi-Xbar)(Xbar-mu) cross term vanishes appropriately, and
+E[(Xbar-mu)^2] = sigma^2/n, giving sum term = n sigma^2 - sigma^2 = (n-1)
+sigma^2. Also mention standard deviation S = sqrt(S^2) is NOT an unbiased
+estimator of sigma even though S^2 is unbiased for sigma^2 (square root is
+a nonlinear/concave transform, so by Jensen's inequality E[S] < sigma in
+general) — a favourite trick question.}
+\end{frame}
+
+\begin{frame}{Other Measures of Center and Spread}
+\begin{itemize}
+    \item \textbf{Median}: robust measure of center, unaffected by extreme
+          outliers (unlike the mean).
+    \item \textbf{Mode}: most frequent value; useful for categorical or
+          multi-modal data.
+    \item \textbf{Range}: $X_{(n)}-X_{(1)}$; highly sensitive to outliers.
+    \item \textbf{Standard deviation}: $S=\sqrt{S^2}$, same units as the
+          data (variance is in squared units).
+    \item \textbf{Coefficient of variation}: $CV = S/\Xbar$, a unit-free
+          measure of relative spread, useful for comparing variability
+          across data sets with different units or scales.
+    \item \textbf{Skewness} and \textbf{kurtosis}: standardized third and
+          fourth central moments, describing asymmetry and tail-heaviness
+          of the distribution's shape.
+\end{itemize}
+\note{This is additional depth beyond the syllabus wording but commonly
+expected in a full descriptive-statistics module: mean/median/mode covers
+"center", range/variance/sd/CV covers "spread", skewness/kurtosis covers
+"shape" — completing the earlier four-way breakdown (center, spread,
+shape, relationship). Mean is pulled toward outliers/skew, median is not;
+this is why income data (right-skewed) is usually summarized with the
+median rather than the mean. Skewness and kurtosis are only introduced
+here as a bullet — the following subsection develops both in full, since
+they are frequently under-covered relative to how often they are tested.}
+\end{frame}
+
+% ---------------- SKEWNESS AND KURTOSIS ----------------
+\subsection{Skewness and Kurtosis}
+
+\begin{frame}{Skewness: Definition}
+\Def{Skewness measures the \emph{asymmetry} of a probability distribution
+about its mean. It is the standardized third central moment.}
+
+\textbf{Population skewness:}
+\[
+    \gamma_1 = \frac{\E[(X-\mu)^3]}{\sigma^3} = \frac{\mu_3}{\sigma^3}
+\]
+
+\begin{itemize}
+    \item $\mu_3 = \E[(X-\mu)^3]$ is the third central moment.
+    \item Dividing by $\sigma^3$ makes $\gamma_1$ \textbf{unit-free} and
+          \textbf{scale-invariant} — the same idea used to turn covariance
+          into a correlation coefficient.
+    \item A symmetric distribution (e.g.\ Normal) has $\gamma_1=0$; cubing
+          preserves sign, so $\gamma_1$ captures \emph{which side} has the
+          longer tail, unlike variance (which squares deviations and loses
+          all sign information).
+\end{itemize}
+\note{Contrast the exponents directly: variance uses the SECOND power
+(always non-negative, so it can only measure spread, never direction of
+asymmetry), while skewness uses the THIRD power, which keeps its sign
+(a large positive deviation cubed stays positive, a large negative
+deviation cubed stays negative). This is exactly why skewness, unlike
+variance, can tell you whether the long tail sits to the right or the
+left of the mean. Also point out this is the natural next member of the
+"standardized $k$-th central moment" family that variance/SD already
+belong to — kurtosis (covered a few slides later) is the $k=4$ member.}
+\end{frame}
+
+\begin{frame}{Sample Skewness: Formulas}
+Given a sample $X_1,\dots,X_n$ with mean $\Xbar$:
+
+\textbf{Method-of-moments (plug-in) sample skewness:}
+\[
+    g_1 = \frac{m_3}{m_2^{3/2}}, \qquad
+    m_k = \frac{1}{n}\sum_{i=1}^n (X_i-\Xbar)^k
+\]
+
+\textbf{Adjusted Fisher--Pearson coefficient} (bias-corrected; used by
+default in Excel, SPSS):
+\[
+    G_1 = \frac{\sqrt{n(n-1)}}{n-2}\, g_1
+\]
+
+\begin{itemize}
+    \item $g_1$ is the ``raw'' plug-in estimator — analogous to
+          $\hat\sigma^2$ (divide by $n$), it is slightly biased in finite
+          samples.
+    \item $G_1$ applies a correction analogous to Bessel's correction for
+          variance, and is preferred for small/moderate $n$.
+    \item As $n\to\infty$, $G_1 \to g_1$, and both are \textbf{consistent}
+          estimators of $\gamma_1$.
+\end{itemize}
+\note{Draw the direct parallel to the sample-variance slide: there, the
+plug-in $\hat\sigma^2$ (divide by $n$) is biased and the corrected $S^2$
+(divide by $n-1$) is unbiased; here, $g_1$ is the plug-in analogue and
+$G_1$ is the corrected analogue, though the correction factor for the
+third moment is more involved than a simple $n/(n-1)$ ratio because
+skewness is a ratio of moments, not a single moment. Students should be
+able to identify $m_2$ here as essentially the population-style
+($n$-divisor) variance, i.e.\ $m_2 = \hat\sigma^2$ from the sample-variance
+slide, reused directly in the skewness formula.}
+\end{frame}
+
+\begin{frame}{Types of Skewness}
+\begin{itemize}
+    \item \textbf{Positive (right) skew:} $\gamma_1>0$. Long tail stretches
+          to the right; a few large values pull the mean upward.
+    \[
+        \text{Mean} > \text{Median} > \text{Mode}
+    \]
+    Example: income distributions, house prices, waiting times.
+
+    \item \textbf{Negative (left) skew:} $\gamma_1<0$. Long tail stretches
+          to the left.
+    \[
+        \text{Mean} < \text{Median} < \text{Mode}
+    \]
+    Example: age at retirement, exam scores on an easy test.
+
+    \item \textbf{Symmetric:} $\gamma_1=0$. Mean $\approx$ Median
+          $\approx$ Mode (holds exactly for unimodal symmetric
+          distributions like the Normal).
+\end{itemize}
+
+\Note{The mean--median--mode ordering above is a common heuristic, not a
+theorem — it can fail for some multimodal or heavy-tailed distributions.}
+\note{This slide directly connects back to the "Other Measures of Center
+and Spread" slide's remark that the median is preferred over the mean for
+skewed data: the ordering here explains WHY — in right-skewed data the
+mean is pulled furthest toward the long tail, the mode stays anchored at
+the most common (peak) value, and the median sits in between. Ask
+students to sketch a right-skewed density and mark all three measures on
+it as a self-check; the visual makes the ordering intuitive rather than
+something to memorize by rote.}
+\end{frame}
+
+\begin{frame}{Pearson's Skewness Coefficients \& Interpreting Magnitude}
+Quick, robust approximations that avoid computing third moments directly:
+
+\textbf{Pearson's first coefficient (mode-based):}
+\[
+    Sk_1 = \frac{\Xbar - \text{Mode}}{S}
+\]
+
+\textbf{Pearson's second coefficient} (median-based, more commonly used
+since the mode is often ill-defined for continuous data):
+\[
+    Sk_2 = \frac{3(\Xbar - \text{Median})}{S}
+\]
+
+\textbf{Rule-of-thumb magnitude interpretation} (for $\gamma_1$ or $g_1$):
+\begin{itemize}
+    \item $|\text{skewness}| < 0.5$: approximately symmetric
+    \item $0.5 \le |\text{skewness}| < 1$: moderately skewed
+    \item $|\text{skewness}| \ge 1$: highly skewed
+\end{itemize}
+\note{Pearson's coefficients are historically important because they let
+you get a quick sense of skew direction and rough magnitude using only
+mean, median/mode, and standard deviation — no need to compute a third
+moment by hand. The factor of 3 in Pearson's second coefficient comes from
+an approximate relationship, valid for moderately skewed unimodal
+distributions, that (Mean - Mode) $\approx$ 3(Mean - Median); this is
+where $Sk_1 \approx Sk_2$ under that approximation. The magnitude
+thresholds are guidance from common statistical software/textbooks, not a
+universal hard rule — flag this if a strict cutoff is asked for in an
+exam, since different sources quote slightly different boundaries.}
+\end{frame}
+
+\begin{frame}{Kurtosis: Definition and Types}
+\Def{Kurtosis is the standardized \emph{fourth} central moment; it
+describes the \emph{tail-heaviness / peakedness} of a distribution
+relative to the Normal.}
+\[
+    \text{Kurtosis} = \frac{\E[(X-\mu)^4]}{\sigma^4}, \qquad
+    \text{Excess Kurtosis} = \text{Kurtosis} - 3
+\]
+
+\begin{itemize}
+    \item \textbf{Normal distribution}: skewness $=0$, excess kurtosis
+          $=0$ (\textbf{mesokurtic}) — the ``3'' is subtracted precisely so
+          the Normal serves as the zero baseline.
+    \item \textbf{Leptokurtic} (excess kurtosis $>0$): heavier tails, more
+          outlier-prone than Normal (e.g.\ Student's $t$).
+    \item \textbf{Platykurtic} (excess kurtosis $<0$): lighter tails,
+          flatter peak (e.g.\ Uniform).
+\end{itemize}
+
+\Note{Skewness answers ``which side is longer?''; kurtosis answers ``how
+heavy are the tails / how outlier-prone is the data?'' Together they
+complete the ``shape'' dimension of descriptive statistics, alongside
+center (mean/median/mode) and spread (variance/SD/IQR). This matters
+practically in finance, anomaly detection, and checking the Normality
+assumptions behind many of the frequentist procedures (e.g.\ $t$- and
+$z$-intervals) introduced later in this module.}
+\note{Emphasize the "-3" convention carefully, since it is a frequent
+source of confusion: RAW kurtosis for a Normal distribution is exactly 3,
+not 0; EXCESS kurtosis subtracts 3 so that Normal becomes the natural
+zero-reference point, analogous to how excess return in finance is
+measured relative to a risk-free baseline. Different software/textbooks
+sometimes report raw kurtosis and sometimes excess kurtosis without
+saying so explicitly — always check which convention a given number uses
+before interpreting it. Also worth flagging: just as skewness has a
+plug-in ($g_1$) and bias-corrected ($G_1$) sample version, kurtosis has an
+analogous pair of sample estimators, following exactly the same
+plug-in-vs-corrected pattern already seen for variance and skewness.}
+\end{frame}
+
+% ---------------- ORDER STATISTICS ----------------
+\subsection{Order Statistics}
+
+\begin{frame}{Order Statistics: Definition}
+Arrange the sample $X_1,\dots,X_n$ in increasing order:
+\[
+    X_{(1)} \le X_{(2)} \le \cdots \le X_{(n)}
+\]
+$X_{(k)}$ is the $k$-th \textbf{order statistic}.
+
+\begin{itemize}
+    \item $X_{(1)}=\min$, $X_{(n)}=\max$, \ \ Range $R = X_{(n)}-X_{(1)}$.
+    \item \textbf{Median}:
+    $
+        X_{((n+1)/2)}\ (n \text{ odd}), \quad
+        \tfrac12\left(X_{(n/2)}+X_{(n/2+1)}\right)\ (n \text{ even})
+    $
+    \item Order statistics are \textbf{not independent} of each other
+          (even if the original $X_i$ are i.i.d.), because knowing
+          $X_{(1)}$ constrains what $X_{(2)},\dots$ can be.
+\end{itemize}
+\note{Order statistics are the foundation of robust statistics — measures
+built from them (median, IQR, trimmed mean) resist distortion by a small
+number of extreme or erroneous observations, unlike the mean and variance
+which use every observation with equal weight and hence can be dragged
+arbitrarily far by a single outlier. This robustness/efficiency trade-off
+(order-statistic-based measures vs.\ moment-based measures) is a recurring
+theme across the whole module.}
+\end{frame}
+
+\begin{frame}{Quantiles, Quartiles, IQR, Boxplot}
+\begin{itemize}
+    \item The \textbf{$p$-th sample quantile} is (approximately) the value
+          below which a fraction $p$ of the data falls; computed by
+          interpolating between order statistics near rank $p(n-1)+1$
+          (conventions vary slightly across software).
+    \item \textbf{Quartiles}: $Q_1$ (25th percentile), $Q_2=$ median (50th),
+          $Q_3$ (75th percentile).
+    \item \textbf{Interquartile range}: $\text{IQR}=Q_3-Q_1$ — spread of the
+          middle 50\% of data, robust to outliers.
+    \item \textbf{Five-number summary}: $X_{(1)}, Q_1, \text{Median}, Q_3,
+          X_{(n)}$ — basis of the boxplot.
+    \item \textbf{Outlier rule of thumb}: flag points outside
+          $[Q_1 - 1.5\,\text{IQR},\ Q_3 + 1.5\,\text{IQR}]$ (Tukey's fences).
+\end{itemize}
+\note{Tukey's 1.5 x IQR fence rule is worth memorizing explicitly, it is a
+frequently tested numeric detail. Boxplots visually encode the five-number
+summary: box spans Q1 to Q3 with a line at the median, whiskers extend to
+the most extreme non-outlier points, and points beyond the fences are
+plotted individually as outliers.}
+\end{frame}
+
+\begin{frame}{Sampling Distribution of Order Statistics}
+For a continuous r.v.\ with pdf $f$ and cdf $F$, the density of the $k$-th
+order statistic (out of $n$ i.i.d.\ draws) is
+\[
+    f_{X_{(k)}}(x) = \frac{n!}{(k-1)!\,(n-k)!}\, [F(x)]^{k-1}\,[1-F(x)]^{n-k}\, f(x)
+\]
+Special cases:
+\[
+    f_{X_{(1)}}(x) = n[1-F(x)]^{n-1}f(x), \qquad
+    f_{X_{(n)}}(x) = n[F(x)]^{n-1}f(x)
+\]
+\Ex{For $X_i \sim \text{Uniform}(0,1)$, $F(x)=x$, so
+$f_{X_{(n)}}(x) = n x^{n-1}$ on $(0,1)$, giving
+$\E[X_{(n)}] = n/(n+1) \to 1$ as $n\to\infty$: the sample maximum
+approaches the true upper endpoint.}
+\note{Derive the formula intuitively: for X_(k) to land near x, you need
+exactly k-1 of the n observations below x, one observation at x, and n-k
+observations above x — the multinomial coefficient n!/((k-1)!1!(n-k)!)
+counts the ways to choose which points play which role, F(x)^{k-1} is the
+probability the k-1 chosen points are below x, [1-F(x)]^{n-k} is the
+probability the rest are above, and f(x)dx is the density contribution of
+the single point at x. This distributional result underlies extreme value
+theory and reliability analysis (e.g., time to first failure among n
+components is min of n lifetimes).}
+\end{frame}
+
+% ---------------- SAMPLE COVARIANCE ----------------
+\subsection{Sample Covariance}
+
+\begin{frame}{Sample Covariance}
+For paired data $(X_1,Y_1),\dots,(X_n,Y_n)$:
+\[
+    S_{XY} = \frac{1}{n-1}\sum_{i=1}^{n} (X_i-\Xbar)(Y_i-\bar Y)
+    = \frac{1}{n-1}\left(\sum_i X_iY_i - n\Xbar\bar Y\right)
+\]
+
+\begin{itemize}
+    \item $S_{XY}>0$: $X$ and $Y$ tend to increase/decrease together.
+    \item $S_{XY}<0$: $X$ and $Y$ tend to move in opposite directions.
+    \item $S_{XY}\approx 0$: little or no \emph{linear} association.
+    \item Magnitude depends on the units of $X$ and $Y$, so raw covariance
+          values are \textbf{not comparable} across different variable
+          pairs — this motivates the correlation coefficient.
+\end{itemize}
+\note{Emphasize covariance only detects LINEAR association: two variables
+can be strongly, deterministically related in a nonlinear way (e.g.
+Y = X^2 for X symmetric around 0) and still have covariance exactly zero.
+This is a very common conceptual pitfall to highlight. Also note S_XY is
+symmetric: S_XY = S_YX.}
+\end{frame}
+
+\begin{frame}{Sample Correlation Coefficient}
+\[
+    r = \frac{S_{XY}}{S_X S_Y} =
+    \frac{\sum_i (X_i-\Xbar)(Y_i-\bar Y)}
+         {\sqrt{\sum_i(X_i-\Xbar)^2}\sqrt{\sum_i(Y_i-\bar Y)^2}}
+\]
+\begin{itemize}
+    \item $-1 \le r \le 1$; unit-free and scale-invariant.
+    \item $|r|=1$ $\Leftrightarrow$ the points lie exactly on a straight
+          line.
+    \item $r=0$: no linear relationship (nonlinear relationship still
+          possible).
+    \item $r$ is unchanged by any positive linear transform of $X$ or $Y$
+          (e.g.\ changing units from cm to inches), and flips sign under a
+          negative linear transform.
+\end{itemize}
+\note{Cauchy-Schwarz inequality is exactly why |r| <= 1: it states
+|sum a_i b_i| <= sqrt(sum a_i^2) sqrt(sum b_i^2), applied here with
+a_i = X_i - Xbar, b_i = Y_i - Ybar. Worth mentioning this as the underlying
+mathematical reason, not just an empirical fact. Also stress correlation
+does not imply causation - a classic caveat to state explicitly in any
+exam answer discussing correlation.}
+\end{frame}
+
+% ---------------- SAMPLE COVARIANCE MATRIX ----------------
+\subsection{Sample Covariance Matrix}
+
+\begin{frame}{Sample Covariance Matrix}
+For $p$-dimensional observations $\mathbf X_1,\dots,\mathbf X_n \in
+\mathbb R^p$ with sample mean vector
+$\bar{\mathbf X}=\frac1n\sum_i \mathbf X_i$:
+\[
+    \mathbf S = \frac{1}{n-1}\sum_{i=1}^n
+    (\mathbf X_i-\bar{\mathbf X})(\mathbf X_i-\bar{\mathbf X})^\top
+\]
+In matrix form, with data matrix $\mathbf X$ ($n\times p$, rows =
+observations) and centering matrix
+$\mathbf H = \mathbf I_n - \frac1n \mathbf 1\mathbf 1^\top$:
+\[
+    \mathbf S = \frac{1}{n-1}\,\mathbf X^\top \mathbf H \mathbf X
+\]
+\begin{itemize}
+    \item $\mathbf S$ is $p\times p$, \textbf{symmetric} and
+          \textbf{positive semi-definite}.
+    \item Diagonal entry $S_{jj}$ = sample variance of variable $j$;
+          off-diagonal $S_{jk}$ = sample covariance of variables $j,k$.
+\end{itemize}
+\note{Positive semi-definiteness matters practically: for any vector a,
+a^T S a = (1/(n-1)) sum_i [a^T(X_i - Xbar)]^2 >= 0, since it's a sum of
+squares of the scalar projections a^T X_i. This guarantees any linear
+combination of the variables has a non-negative estimated variance, as it
+must. The centering matrix H is idempotent (H H = H) and symmetric,
+which is why it appears naturally when you write out sums of squared
+centered deviations in matrix form.}
+\end{frame}
+
+\begin{frame}{Sample Correlation Matrix}
+Let $\mathbf D=\operatorname{diag}(\sqrt{S_{11}},\dots,\sqrt{S_{pp}})$.
+\[
+    \mathbf R = \mathbf D^{-1}\mathbf S\mathbf D^{-1}
+\]
+\begin{itemize}
+    \item $\mathbf R$ has $1$'s on the diagonal, entries in $[-1,1]$
+          elsewhere.
+    \item Standardizes each variable, removing the effect of differing
+          units/scales, so that variables can be compared directly.
+    \item Both $\mathbf S$ and $\mathbf R$ are the starting point for
+          multivariate techniques:
+    \begin{itemize}
+        \item \textbf{PCA}: eigen-decomposition of $\mathbf S$ (or
+              $\mathbf R$) to find directions of maximal variance.
+        \item \textbf{Mahalanobis distance}: uses $\mathbf S^{-1}$ to
+              measure distance accounting for correlation between
+              variables.
+        \item Multivariate normal likelihood is parameterized directly by
+              a covariance matrix.
+    \end{itemize}
+\end{itemize}
+\note{PCA link is a good bridge to more advanced courses: the eigenvectors
+of S give the principal component directions, and the eigenvalues give the
+variance explained along each direction. Mention that S must be invertible
+(full rank, requiring n > p typically) for Mahalanobis distance and many
+multivariate procedures to be well-defined; when p is large relative to n,
+S becomes singular or ill-conditioned, a known practical issue in
+high-dimensional statistics.}
+\end{frame}
+
+% ============================================================
+\section{Frequentist Statistics}
+% ============================================================
+
+\begin{frame}{Frequentist Statistics: Overview}
+\Def{Under the frequentist interpretation, probability is the long-run
+relative frequency of an event under (hypothetical) repeated sampling.
+Population parameters ($\theta$) are treated as fixed, unknown constants;
+randomness enters only through the sampling process, not through
+$\theta$ itself.}
+\begin{itemize}
+    \item Contrast with Bayesian statistics, which treats $\theta$ itself as
+          a random variable with a prior distribution.
+    \item Core frequentist tools: point estimation, sampling distributions,
+          bias/variance/MSE, consistency, confidence intervals, hypothesis
+          testing.
+    \item This module covers: sampling, MSE, consistency, confidence
+          intervals, and parametric \& non-parametric estimation.
+\end{itemize}
+\note{It is worth explicitly contrasting frequentist and Bayesian
+philosophies even briefly, since exam questions sometimes ask students to
+articulate the difference: frequentist statements like a 95% CI are about
+long-run coverage properties of the PROCEDURE across repeated samples, not
+a probability statement about the specific fixed parameter given the one
+observed data set. This distinction resurfaces explicitly in the
+confidence interval section.}
+\end{frame}
+
+% ---------------- SAMPLING ----------------
+\subsection{Sampling}
+
+\begin{frame}{Sampling: Basic Concepts}
+\begin{itemize}
+    \item \textbf{Population}: entire set of units of interest.
+          \textbf{Sample}: the observed subset.
+    \item \textbf{Random (i.i.d.) sample}: $X_1,\dots,X_n$ independent,
+          each distributed as the population distribution $F_\theta$.
+    \item \textbf{Statistic}: a function $T(X_1,\dots,X_n)$ of the sample
+          that does not depend on unknown parameters (e.g.\ $\Xbar$, $S^2$,
+          sample max).
+    \item \textbf{Sampling distribution}: the probability distribution of a
+          statistic $T$, induced purely by the randomness in the sample.
+    \item \textbf{Standard error}: the standard deviation of a statistic's
+          sampling distribution, e.g.\ $\text{SE}(\Xbar)=\sigma/\sqrt n$.
+\end{itemize}
+\note{Distinguish clearly between a PARAMETER (fixed, unknown, a property
+of the population, e.g. mu, sigma^2) and a STATISTIC (random, computable
+from data, e.g. Xbar, S^2) and an ESTIMATE (the numeric value a statistic
+takes for one particular observed data set). Confusing these three is one
+of the most common sources of error in introductory exams.}
+\end{frame}
+
+\begin{frame}{Sampling Methods}
+\begin{itemize}
+    \item \textbf{Simple random sampling (SRS)}: every subset of size $n$
+          is equally likely to be chosen.
+    \item \textbf{Stratified sampling}: divide the population into
+          homogeneous strata, sample independently within each — reduces
+          variance when strata differ substantially.
+    \item \textbf{Cluster sampling}: divide into clusters, randomly select
+          whole clusters — cheaper logistically, but usually less efficient
+          than SRS since units within a cluster tend to be similar.
+    \item \textbf{Systematic sampling}: choose every $k$-th unit from an
+          ordered list, with a random starting point.
+    \item \textbf{With vs.\ without replacement}: sampling with replacement
+          preserves exact independence; sampling without replacement from a
+          finite population of size $N$ requires the \textbf{finite
+          population correction} factor $\sqrt{(N-n)/(N-1)}$ multiplying the
+          standard error.
+\end{itemize}
+\note{Finite population correction (FPC) approaches 1 (negligible) when
+n << N, which is why in most textbook problems (infinite or very large
+populations) it is simply ignored; it becomes important in survey sampling
+of small, finite populations where you sample an appreciable fraction of
+the whole population.}
+\end{frame}
+
+\begin{frame}{Sampling Distribution of the Mean}
+If $X_1,\dots,X_n$ i.i.d.\ with mean $\mu$, variance $\sigma^2$:
+\[
+    \E[\Xbar]=\mu, \qquad \Var(\Xbar)=\frac{\sigma^2}{n}
+\]
+\begin{itemize}
+    \item Population exactly Normal $\Rightarrow$
+          $\Xbar \sim N(\mu,\sigma^2/n)$ \textbf{exactly}, for every $n$.
+    \item Otherwise, by the CLT, for large $n$:
+          $\Xbar \approx N(\mu,\sigma^2/n)$ approximately.
+    \item \textbf{Rule of thumb}: CLT approximation is usually adequate for
+          $n\gtrsim 30$ for moderately skewed populations; more skewed or
+          heavy-tailed populations need larger $n$.
+\end{itemize}
+\note{Also worth mentioning Chebyshev's inequality here as a distribution-
+free (non-normal-assuming) bound: P(|Xbar - mu| >= k * SE) <= 1/k^2. It is
+much looser than the normal-based bound but requires no distributional
+assumption beyond finite variance, illustrating the trade-off between
+assumption strength and bound tightness that recurs throughout the
+frequentist section.}
+\end{frame}
+
+% ---------------- MEAN SQUARE ERROR ----------------
+\subsection{Mean Square Error}
+
+\begin{frame}{Mean Square Error (MSE)}
+For an estimator $\hat\theta$ of parameter $\theta$:
+\[
+    \MSE(\hat\theta)=\E\big[(\hat\theta-\theta)^2\big]
+    = \Var(\hat\theta) + \big[\Bias(\hat\theta)\big]^2,
+    \qquad \Bias(\hat\theta)=\E[\hat\theta]-\theta
+\]
+\textbf{Derivation:}
+\begin{align*}
+\E[(\hat\theta-\theta)^2]
+&= \E\Big[\big((\hat\theta-\E[\hat\theta]) + (\E[\hat\theta]-\theta)\big)^2\Big]\\
+&= \Var(\hat\theta) + 2(\E[\hat\theta]-\theta)\underbrace{\E[\hat\theta-\E[\hat\theta]]}_{=0}
+   + \big(\E[\hat\theta]-\theta\big)^2\\
+&= \Var(\hat\theta)+\Bias(\hat\theta)^2
+\end{align*}
+\note{This decomposition is arguably the single most important formula in
+the whole module and reappears throughout applied statistics and machine
+learning as the "bias-variance trade-off". Make sure students can both
+recite it and reproduce the short derivation: it hinges only on adding and
+subtracting E[theta-hat] inside the square and noting the cross term has
+expectation zero because E[theta-hat - E[theta-hat]] = 0 by definition of
+expectation.}
+\end{frame}
+
+\begin{frame}{MSE: Interpretation, Trade-offs, Example}
+\begin{itemize}
+    \item MSE is the standard criterion to compare competing estimators —
+          smaller MSE is better.
+    \item Unbiased estimator: $\Bias=0 \Rightarrow \MSE=\Var$.
+    \item A slightly \textbf{biased} estimator can have a much smaller
+          variance, giving \emph{lower total MSE} than an unbiased
+          alternative — the bias--variance trade-off (e.g.\ ridge
+          regression vs.\ ordinary least squares).
+\end{itemize}
+\Ex{Compare $\hat\sigma^2=\frac1n\sum(X_i-\Xbar)^2$ (biased, MLE) with
+$S^2=\frac{1}{n-1}\sum(X_i-\Xbar)^2$ (unbiased). Under normality it can be
+shown that $\hat\sigma^2$, despite its bias, has \emph{smaller} MSE than
+$S^2$ for estimating $\sigma^2$ — biasedness alone does not make an
+estimator worse overall.}
+\note{This worked example is a favourite "trick" exam question: students
+who only check unbiasedness will wrongly conclude S^2 is unambiguously
+"better" than the MLE version; but MSE, the more complete criterion,
+sometimes favours the biased estimator. Encourage computing both Var and
+Bias^2 explicitly for full marks rather than asserting the conclusion.}
+\end{frame}
+
+% ---------------- CONSISTENCY ----------------
+\subsection{Consistency}
+
+\begin{frame}{Consistency of Estimators}
+$\hat\theta_n$ is a \textbf{consistent} estimator of $\theta$ if it
+converges in probability to $\theta$:
+\[
+    \hat\theta_n \xrightarrow{P} \theta
+    \iff
+    \forall \varepsilon>0,\quad \lim_{n\to\infty} P(|\hat\theta_n-\theta|>\varepsilon)=0
+\]
+
+\textbf{Sufficient condition (mean-square consistency):} if
+$\Bias(\hat\theta_n)\to 0$ and $\Var(\hat\theta_n)\to 0$ as $n\to\infty$,
+then $\MSE(\hat\theta_n)\to 0$, which implies $\hat\theta_n
+\xrightarrow{P}\theta$ (by Chebyshev's inequality applied to
+$\hat\theta_n - \theta$).
+
+\begin{itemize}
+    \item $\Xbar$ is consistent for $\mu$: $\Bias=0$,
+          $\Var(\Xbar)=\sigma^2/n\to 0$.
+    \item $S^2$ is consistent for $\sigma^2$.
+    \item $\hat\sigma^2$ (MLE, divide by $n$) is also consistent for
+          $\sigma^2$, even though biased for every finite $n$.
+\end{itemize}
+\note{Prove the sufficient condition explicitly if time permits: by
+Chebyshev, P(|theta-hat - theta| > eps) <= MSE(theta-hat)/eps^2 -> 0 if
+MSE -> 0. This directly links back to the MSE slide, reinforcing why MSE
+convergence is a convenient, checkable route to establishing consistency
+without working with the probability statement directly.}
+\end{frame}
+
+\begin{frame}{Consistency vs.\ Unbiasedness}
+\begin{itemize}
+    \item \textbf{Unbiasedness} is a \emph{finite-sample} property:
+          $\E[\hat\theta_n]=\theta$ must hold for every fixed $n$.
+    \item \textbf{Consistency} is an \emph{asymptotic} property: behavior
+          only as $n\to\infty$.
+    \item Possible combinations:
+    \begin{itemize}
+        \item Unbiased \emph{and} consistent — e.g.\ $\Xbar$, $S^2$.
+        \item Biased but consistent — e.g.\ MLE variance
+              $\hat\sigma^2=\frac1n\sum(X_i-\Xbar)^2$: biased for finite
+              $n$, but bias $\to 0$ as $n\to\infty$.
+        \item Unbiased but \emph{not} consistent — possible in
+              pathological/contrived constructions (e.g.\ an estimator that
+              ignores most of the data and has non-vanishing variance).
+        \item Neither unbiased nor consistent — a poorly chosen estimator.
+    \end{itemize}
+\end{itemize}
+\note{Give a concrete pathological example if asked: an estimator that
+always just uses the FIRST observation, theta-hat = X_1, is unbiased for
+mu (since E[X_1]=mu) but is NOT consistent, because its variance stays at
+sigma^2 forever and never shrinks as n grows — it never "uses" the
+additional data. This crisply separates the two concepts.}
+\end{frame}
+
+% ---------------- CONFIDENCE INTERVALS ----------------
+\subsection{Confidence Intervals}
+
+\begin{frame}{Confidence Intervals: Definition and Interpretation}
+A $100(1-\alpha)\%$ confidence interval (CI) for $\theta$ is a random
+interval $[L(\mathbf X), U(\mathbf X)]$ satisfying
+\[
+    P(L \le \theta \le U) = 1-\alpha
+\]
+\textbf{Correct frequentist interpretation:} if the sampling procedure were
+repeated many times and a CI constructed each time, approximately
+$100(1-\alpha)\%$ of those intervals would contain the true, fixed
+$\theta$. The interval is random; $\theta$ is fixed.
+
+\textbf{Common wrong interpretation to avoid:} ``there is a 95\% probability
+that $\theta$ lies in \emph{this particular} computed interval'' — once
+data are observed and $L,U$ are specific numbers, $\theta$ either is or is
+not in $[L,U]$; there is no probability left in a frequentist framework.
+\note{This slide addresses the single most commonly mis-stated concept in
+introductory statistics. If an exam asks you to interpret a specific
+computed 95% CI, always phrase it in terms of the long-run performance of
+the PROCEDURE ("we are 95% confident" as a statement about the method),
+never as a probability statement about the fixed parameter given this one
+realized interval.}
+\end{frame}
+
+\begin{frame}{CI for the Mean: $\sigma$ Known}
+If $X_1,\dots,X_n\stackrel{iid}\sim N(\mu,\sigma^2)$ (or $n$ large via CLT)
+and $\sigma$ is \textbf{known}:
+\[
+    \Xbar \pm z_{\alpha/2}\,\frac{\sigma}{\sqrt n}
+\]
+where $z_{\alpha/2}$ is the upper-$\alpha/2$ quantile of $N(0,1)$
+($z_{0.025}=1.96$ for a 95\% CI; $z_{0.005}=2.576$ for 99\%).
+
+\textbf{Derivation:} $Z=\dfrac{\Xbar-\mu}{\sigma/\sqrt n}\sim N(0,1)$
+(this $Z$ is a \textbf{pivotal quantity} — see later slide). Then
+$P(-z_{\alpha/2}\le Z\le z_{\alpha/2})=1-\alpha$; rearranging the inequality
+to isolate $\mu$ gives the interval above.
+\note{Walk through the algebra of isolating mu from the inequality
+explicitly in class: -z <= (Xbar - mu)/(sigma/sqrt n) <= z rearranges to
+Xbar - z*sigma/sqrt(n) <= mu <= Xbar + z*sigma/sqrt(n). This exact
+rearrangement technique (start from a known probability statement about a
+pivot, then isolate theta) is the GENERAL METHOD used for every CI in this
+module, not just this one case.}
+\end{frame}
+
+\begin{frame}{CI for the Mean: $\sigma$ Unknown (t-interval)}
+Replace $\sigma$ with sample standard deviation $S$; use Student's
+$t$-distribution with $n-1$ degrees of freedom:
+\[
+    \Xbar \pm t_{\alpha/2,\,n-1}\,\frac{S}{\sqrt n}
+\]
+\begin{itemize}
+    \item $T=\dfrac{\Xbar-\mu}{S/\sqrt n}\sim t_{n-1}$ when the population
+          is normal.
+    \item $t$-distribution has heavier tails than $N(0,1)$
+          $\Rightarrow t_{\alpha/2,n-1} > z_{\alpha/2}$, reflecting the
+          extra uncertainty from also having to estimate $\sigma$.
+    \item As $n\to\infty$, $t_{n-1}\to N(0,1)$, so the $t$- and
+          $z$-intervals converge for large samples.
+\end{itemize}
+\note{Emphasize WHY the t-distribution is needed at all: once you replace
+the known sigma with the estimated S, the ratio (Xbar-mu)/(S/sqrt n) picks
+up extra variability from S itself being random, and this extra
+variability is exactly what gives the t-distribution its heavier tails
+relative to the normal. Degrees of freedom n-1 again reflects that one
+degree of freedom was "used up" estimating mu via Xbar inside S^2 itself.}
+\end{frame}
+
+\begin{frame}{CI for a Proportion}
+For large $n$, with sample proportion $\hat p = X/n$ ($X$ = number of
+successes out of $n$ Bernoulli trials):
+\[
+    \hat p \pm z_{\alpha/2}\sqrt{\frac{\hat p(1-\hat p)}{n}}
+\]
+based on the normal approximation to the Binomial distribution, generally
+considered valid when $n\hat p \ge 5$ and $n(1-\hat p)\ge 5$.
+
+\Note{An alternative, often more accurate for small/moderate $n$, is the
+\textbf{Wilson score interval}, which does not rely on the same crude
+normal approximation and performs better near $\hat p$ close to 0 or 1.}
+\note{Point out the naive Wald interval above can behave badly (even
+producing bounds outside [0,1]) when p-hat is near 0 or 1 or n is small —
+worth mentioning the Wilson interval by name as a superior alternative
+even if its formula is not required to be memorized, since it shows
+awareness of the practical limitations of the basic method.}
+\end{frame}
+
+\begin{frame}{CI for Variance}
+If $X_1,\dots,X_n\stackrel{iid}\sim N(\mu,\sigma^2)$:
+\[
+    \frac{(n-1)S^2}{\sigma^2}\sim \chi^2_{n-1}
+\]
+$100(1-\alpha)\%$ CI for $\sigma^2$:
+\[
+    \left(\frac{(n-1)S^2}{\chi^2_{\alpha/2,\,n-1}},\ \
+    \frac{(n-1)S^2}{\chi^2_{1-\alpha/2,\,n-1}}\right)
+\]
+where $\chi^2_{\alpha/2,n-1}$ is the upper-$\alpha/2$ quantile of the
+chi-square distribution with $n-1$ degrees of freedom.
+\note{Note the asymmetry: unlike the mean's CI, this interval is NOT of
+the simple "estimate plus-or-minus margin" form, because the chi-square
+distribution is itself asymmetric (skewed right), and dividing by a larger
+chi-square quantile gives the SMALLER endpoint while dividing by the
+smaller quantile gives the LARGER endpoint — students often flip these by
+mistake, so double check which chi-square quantile goes with which bound.}
+\end{frame}
+
+\begin{frame}{General Construction: Pivotal Quantities}
+\Def{A pivotal quantity is a function $Q(\mathbf X,\theta)$ of the data and
+the parameter whose sampling distribution does not depend on $\theta$ or
+any other unknown parameter.}
+\begin{itemize}
+    \item \textbf{Recipe:} (1) find a pivot $Q$; (2) using its known
+          distribution, find $a,b$ with $P(a\le Q\le b)=1-\alpha$;
+          (3) algebraically invert the inequality to isolate $\theta$.
+    \item Pivots seen so far: $Z=\frac{\Xbar-\mu}{\sigma/\sqrt n}$,
+          $T=\frac{\Xbar-\mu}{S/\sqrt n}$, $\chi^2=\frac{(n-1)S^2}{\sigma^2}$.
+    \item CI width typically shrinks like $1/\sqrt n$ — more data gives a
+          more precise (narrower) interval, all else equal.
+\end{itemize}
+\note{The pivotal-quantity method is the unifying, general-purpose
+technique behind every specific CI formula on the previous slides — if a
+student forgets a formula in an exam, they can, in principle, re-derive it
+from scratch given (a) an appropriate pivot with a KNOWN distribution not
+involving the unknown parameter, and (b) tables/quantiles of that
+distribution. This is worth stressing as the "big picture" takeaway of the
+whole confidence-interval section.}
+\end{frame}
+
+% ---------------- PARAMETRIC ESTIMATION ----------------
+\subsection{Parametric Model Estimation}
+
+\begin{frame}{Parametric Estimation: Setup}
+\Def{A parametric model assumes data come from a distribution family
+$\{f_\theta:\theta\in\Theta\}$ indexed by a finite-dimensional parameter
+$\theta\in\Theta\subseteq\mathbb R^k$ (e.g.\ Normal$(\mu,\sigma^2)$,
+Binomial$(n,p)$, Poisson$(\lambda)$, Exponential$(\lambda)$).}
+Main estimation methods covered:
+\begin{enumerate}
+    \item Method of Moments (MoM)
+    \item Maximum Likelihood Estimation (MLE)
+    \item (Brief mention) Least Squares — for regression-type models
+    \item (Brief mention) Bayesian estimation — for contrast; not strictly
+          frequentist since it treats $\theta$ as random with a prior.
+\end{enumerate}
+\note{Reiterate the key defining feature of "parametric": the entire
+unknown distribution is captured by a FINITE, fixed-length list of numbers
+(theta), so estimation reduces to estimating that finite list, in contrast
+to the non-parametric setting later where the "parameter" is effectively
+an entire unknown function.}
+\end{frame}
+
+\begin{frame}{Method of Moments}
+\textbf{Idea:} equate population moments $\mu_k=\E[X^k]$ to sample moments
+$m_k=\frac1n\sum_i X_i^k$ and solve for $\theta$.
+
+\Ex{Normal$(\mu,\sigma^2)$:}
+\[
+    \hat\mu_{MoM}=\Xbar, \qquad
+    \hat\sigma^2_{MoM}=\frac1n\sum_i (X_i-\Xbar)^2
+\]
+\Ex{Exponential$(\lambda)$, where $\E[X]=1/\lambda$:}
+\[
+    \hat\lambda_{MoM}=1/\Xbar
+\]
+\Ex{Uniform$(0,\theta)$, where $\E[X]=\theta/2$:}
+\[
+    \hat\theta_{MoM}=2\Xbar
+\]
+\Note{MoM estimators are simple to compute but can sometimes fall outside
+the valid parameter space (e.g.\ $2\Xbar$ could in principle be less than
+$X_{(n)}$'s observed maximum) and are generally less statistically
+efficient than MLE.}
+\note{The Uniform(0,theta) example is a nice one to contrast with MLE
+later: the MLE for this model turns out to be the sample maximum X_(n),
+which is quite different in character from the MoM estimator 2*Xbar — a
+good illustration that different estimation principles can give genuinely
+different-looking estimators for the same parameter.}
+\end{frame}
+
+\begin{frame}{Maximum Likelihood Estimation (MLE)}
+\textbf{Likelihood function:}
+\[
+    L(\theta\mid x_1,\dots,x_n)=\prod_{i=1}^n f_\theta(x_i)
+\]
+\textbf{MLE:}
+\[
+    \hat\theta_{MLE}=\arg\max_{\theta\in\Theta} L(\theta)
+    =\arg\max_\theta \ell(\theta), \qquad \ell(\theta)=\log L(\theta)
+\]
+found (when $\ell$ is differentiable) by solving the \textbf{score
+equation} $\partial\ell(\theta)/\partial\theta=0$.
+
+\textbf{Properties (under regularity conditions), as $n\to\infty$:}
+\begin{itemize}
+    \item Consistent: $\hat\theta_{MLE}\xrightarrow{P}\theta$.
+    \item Asymptotically normal and asymptotically efficient (attains the
+          Cram\'er--Rao lower bound in the limit).
+    \item \textbf{Invariance property}: the MLE of $g(\theta)$ is
+          $g(\hat\theta_{MLE})$ for any function $g$.
+\end{itemize}
+\note{The invariance property is powerful and easy to forget: e.g. if you
+have the MLE for sigma^2, the MLE for sigma (the standard deviation) is
+simply the square root of the MLE for sigma^2 - you do NOT need to
+re-derive a separate likelihood maximization for every transformed
+parameter of interest.}
+\end{frame}
+
+\begin{frame}{MLE Example: Normal Distribution}
+For $X_1,\dots,X_n\stackrel{iid}\sim N(\mu,\sigma^2)$:
+\[
+    \ell(\mu,\sigma^2)=-\frac n2\log(2\pi\sigma^2)
+    -\frac{1}{2\sigma^2}\sum_{i=1}^n (x_i-\mu)^2
+\]
+Setting $\partial \ell/\partial\mu=0$ and $\partial\ell/\partial\sigma^2=0$
+and solving jointly:
+\[
+    \hat\mu_{MLE}=\Xbar, \qquad
+    \hat\sigma^2_{MLE}=\frac1n\sum_{i=1}^n (x_i-\Xbar)^2
+\]
+Note $\hat\sigma^2_{MLE}$ is \textbf{biased} (divides by $n$, not $n-1$)
+but is still \textbf{consistent}.
+\end{frame}
+
+\begin{frame}{MLE Example: Bernoulli/Binomial and Poisson}
+\Ex{Bernoulli$(p)$, data $X_1,\dots,X_n\in\{0,1\}$:}
+\[
+    \ell(p)=\left(\sum_i x_i\right)\log p + \left(n-\sum_i x_i\right)\log(1-p)
+    \ \Rightarrow\ \hat p_{MLE}=\frac1n\sum_i X_i = \Xbar
+\]
+\Ex{Poisson$(\lambda)$:}
+\[
+    \ell(\lambda)= -n\lambda + \Big(\sum_i x_i\Big)\log\lambda - \sum_i\log(x_i!)
+    \ \Rightarrow\ \hat\lambda_{MLE}=\Xbar
+\]
+\begin{itemize}
+    \item In both cases the MLE coincides exactly with the sample mean and
+          with the Method-of-Moments estimator — this is common (though not
+          universal) for simple one-parameter exponential-family models.
+\end{itemize}
+\note{Deliberately chosen so MLE = MoM = sample mean in both cases -
+useful for building intuition, but stress explicitly this coincidence does
+NOT hold in general (e.g. Uniform(0,theta) from two slides ago, where MLE
+= X_(n) but MoM = 2*Xbar - very different answers).}
+\end{frame}
+
+\begin{frame}{Fisher Information and the Cram\'er--Rao Lower Bound}
+\textbf{Fisher information} (single observation):
+\[
+    I(\theta)=\E\left[\left(\frac{\partial\log f_\theta(X)}{\partial\theta}\right)^2\right]
+    = -\E\left[\frac{\partial^2\log f_\theta(X)}{\partial\theta^2}\right]
+\]
+\textbf{Cram\'er--Rao lower bound (CRLB):} for any unbiased estimator
+$\hat\theta$ based on $n$ i.i.d.\ observations,
+\[
+    \Var(\hat\theta)\ \ge\ \frac{1}{n\,I(\theta)}
+\]
+An estimator achieving this bound with equality is called
+\textbf{efficient}. MLE is asymptotically efficient (achieves the bound as
+$n\to\infty$, under regularity conditions).
+\note{Two equivalent formulas for Fisher information are given (expected
+square of the score, and negative expected second derivative /
+"curvature" of the log-likelihood) - the second is usually algebraically
+easier to compute in practice for standard distributions. CRLB gives an
+absolute floor on how small the variance of ANY unbiased estimator can be;
+this is why "achieving the CRLB" is treated as the gold standard of
+estimator efficiency, analogous to how MSE was the gold standard
+comparison criterion earlier.}
+\end{frame}
+
+% ---------------- NON-PARAMETRIC ESTIMATION ----------------
+\subsection{Non-parametric Model Estimation}
+
+\begin{frame}{Non-parametric Estimation: Setup}
+\Def{A non-parametric model makes no finite-dimensional assumption about
+the form of $f$ or $F$; the object being estimated (the whole function) is
+effectively infinite-dimensional.}
+\textbf{Trade-off vs.\ parametric methods:}
+\begin{itemize}
+    \item \textbf{Parametric}: highly efficient \emph{if} the assumed model
+          is correct; can be badly biased if the model is wrong
+          (misspecified).
+    \item \textbf{Non-parametric}: robust to misspecification (fewer
+          assumptions to get wrong); typically requires more data and
+          converges more slowly than a correctly specified parametric
+          model would.
+\end{itemize}
+\note{This slide's trade-off framing directly parallels the earlier
+bias-variance framing of MSE: choosing a parametric model is like
+accepting some risk of bias (if wrong) in exchange for lower variance
+(fewer things to estimate); choosing non-parametric methods reduces
+model-misspecification bias risk at the cost of needing more data /
+having higher variance for a given sample size.}
+\end{frame}
+
+\begin{frame}{Empirical Distribution Function}
+\[
+    \hat F_n(x)=\frac1n\sum_{i=1}^n \mathbf 1\{X_i\le x\}
+\]
+\begin{itemize}
+    \item Natural non-parametric estimator of the true cdf $F$: a step
+          function jumping by $1/n$ at each observed data point.
+    \item For fixed $x$: $n\hat F_n(x)\sim \text{Binomial}(n,F(x))$, so
+          $\hat F_n(x)$ is \textbf{unbiased} with
+          $\Var(\hat F_n(x))=F(x)(1-F(x))/n$.
+    \item \textbf{Glivenko--Cantelli theorem} (``fundamental theorem of
+          statistics''):
+    \[
+        \sup_x |\hat F_n(x)-F(x)| \xrightarrow{a.s.} 0 \quad\text{as } n\to\infty
+    \]
+    i.e.\ uniform, almost-sure convergence of the entire estimated curve to
+    the true cdf, not just pointwise convergence.
+\end{itemize}
+\note{Glivenko-Cantelli is stronger than simple pointwise consistency at
+each x (which follows immediately from the LLN applied to the indicator
+variables) - it guarantees the WORST-CASE gap across all x simultaneously
+vanishes, which is what justifies using the empirical cdf as a reliable
+stand-in for the true cdf uniformly, e.g. in goodness-of-fit tests like
+the Kolmogorov-Smirnov test, which is built directly on this supremum
+statistic.}
+\end{frame}
+
+\begin{frame}{Kernel Density Estimation (KDE)}
+\[
+    \hat f_h(x)=\frac{1}{nh}\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right)
+\]
+\begin{itemize}
+    \item $K(\cdot)$: kernel function (e.g.\ Gaussian, Epanechnikov),
+          typically symmetric and integrating to 1.
+    \item $h>0$: \textbf{bandwidth}, controlling smoothness — the
+          continuous analogue of histogram bin width.
+    \item \textbf{Bias--variance trade-off in $h$}: small $h$ gives low bias
+          but high variance (wiggly estimate); large $h$ gives high bias
+          (oversmoothed) but low variance.
+    \item KDE generalizes the histogram by replacing the rigid, hard-edged
+          bin-membership indicator with a smooth, weighted kernel — this
+          removes the artificial discontinuities (jumps) present in a
+          histogram.
+\end{itemize}
+\note{Optimal bandwidth selection (e.g. via cross-validation, or rules
+like Silverman's rule of thumb h = 1.06 * min(s, IQR/1.34) * n^{-1/5}) is
+an important practical topic; the exponent -1/5 for KDE bandwidth
+(compared to -1/3 for histogram bin width in Scott's rule) reflects that
+KDE's smoother construction allows a different, in fact better,
+asymptotic convergence rate for the estimated density.}
+\end{frame}
+
+\begin{frame}{Non-parametric Regression}
+\textbf{Nadaraya--Watson kernel regression estimator:}
+\[
+    \hat m(x)=\frac{\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right) Y_i}
+                    {\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right)}
+\]
+\begin{itemize}
+    \item A kernel-weighted local average of the $Y_i$ near $x$, estimating
+          $m(x)=\E[Y\mid X=x]$ without assuming any specific functional
+          form (e.g.\ not assuming linearity as ordinary linear regression
+          does).
+    \item Related non-parametric regression methods: local polynomial
+          regression, smoothing splines, $k$-nearest-neighbours regression.
+    \item \textbf{Convergence rates}: non-parametric estimators typically
+          converge more slowly than correctly specified parametric
+          estimators — e.g.\ KDE/Nadaraya--Watson rate is roughly
+          $n^{-2/5}$, versus $n^{-1/2}$ for a correctly specified parametric
+          MLE — the statistical price paid for not assuming a model form.
+\end{itemize}
+\note{This n^{-2/5} vs n^{-1/2} rate comparison is the clean, quantitative
+punchline of the entire "parametric vs non-parametric" discussion running
+through this whole section: parametric models, when correct, converge
+faster (the classical "root-n" rate), while non-parametric methods
+converge more slowly in exchange for making far weaker assumptions about
+the underlying model - a foundational idea that carries directly into
+modern non-parametric and machine learning methods.}
+\end{frame}
+
+\begin{frame}{Bootstrap: A Non-parametric Resampling Method}
+\begin{itemize}
+    \item \textbf{Idea}: treat the observed empirical distribution
+          $\hat F_n$ as a stand-in for the true (unknown) $F$, and simulate
+          the sampling distribution of a statistic by repeatedly resampling
+          \emph{with replacement} from the observed data.
+    \item \textbf{Procedure}: draw $B$ resamples of size $n$ from
+          $X_1,\dots,X_n$ (with replacement); compute the statistic of
+          interest $\hat\theta^{*}_b$ on each resample; use the empirical
+          distribution of $\{\hat\theta^*_1,\dots,\hat\theta^*_B\}$ to
+          approximate the sampling distribution of $\hat\theta$, estimate
+          its standard error, or build a confidence interval.
+    \item Useful when the sampling distribution of a statistic has no
+          simple closed-form expression (e.g.\ for the sample median or a
+          complicated function of parameters).
+\end{itemize}
+\note{The bootstrap is a fully non-parametric, computational alternative
+to the analytic pivotal-quantity method used earlier for constructing
+confidence intervals - instead of relying on a KNOWN distribution for a
+pivot (like Z, T, or chi-square), the bootstrap uses the computer to
+approximate the sampling distribution directly from resampled data. This
+makes a nice closing bridge between the classical CI section and modern
+computational statistics.}
+\end{frame}
+
+% ============================================================
+\section{Summary}
+% ============================================================
+
+\begin{frame}{Module Summary}
+\begin{columns}[T]
+\column{0.5\textwidth}
+\textbf{Descriptive Statistics}
+\begin{itemize}
+    \item Histogram (bin-width rules, density estimate)
+    \item Sample mean $\Xbar$, sample variance $S^2$
+    \item Skewness and kurtosis (shape)
+    \item Order statistics, quantiles, IQR, boxplot
+    \item Sample covariance, correlation
+    \item Sample covariance/correlation matrix, link to PCA
+\end{itemize}
+\column{0.5\textwidth}
+\textbf{Frequentist Statistics}
+\begin{itemize}
+    \item Sampling, sampling distributions, standard error
+    \item MSE = Variance + Bias$^2$
+    \item Consistency vs.\ unbiasedness
+    \item Confidence intervals via pivotal quantities
+    \item Parametric estimation: MoM, MLE, Fisher info, CRLB
+    \item Non-parametric: EDF, Glivenko--Cantelli, KDE,
+          Nadaraya--Watson, bootstrap
+\end{itemize}
+\end{columns}
+\note{Use this slide as a final review checklist: for a thorough exam
+preparation pass, a student should be able to state a precise definition,
+write the key formula, and give at least one derivation or worked example
+for every single bullet point listed here, including the newly expanded
+skewness and kurtosis subsection.}
+\end{frame}
+
+\begin{frame}
+\centering
+\Huge{Thank You}\\[10pt]
+\end{frame}
+
+\end{document}
