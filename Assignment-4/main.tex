@@ -1,0 +1,582 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+% ---------- Packages ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+% ---------- Theme ----------
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\definecolor{ans}{RGB}{0,70,140}
+
+% ---------- Helper macro: \qa{label}{question}{worked answer} ----------
+\newcommand{\qa}[3]{%
+  \textbf{Q#1.} #2\par\smallskip
+  {\color{ans}\textbf{Solution.} #3}\par\vspace{6pt}}
+
+% ---------- Title info ----------
+\title{Mathematics of Computing}
+\subtitle{Module 1 Assignment: Logic, Proofs and Induction}
+\author{Aishwarya J S}
+\institute{M.Tech CSE (Artificial Intelligence and Data Science)}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\small
+\begin{columns}[t]
+\begin{column}{0.48\textwidth}
+\begin{enumerate}
+  \item Proposition
+  \item Predicate
+  \item Quantifiers
+  \item Truth Table
+  \item First Order Logic
+  \item Satisfiability
+  \item Patterns of Proof
+\end{enumerate}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{enumerate}\setcounter{enumi}{7}
+  \item Proving If and Only If
+  \item Proving Sets and Set Equations
+  \item Russell's Paradox
+  \item Well Ordering Principle
+  \item Induction and Invariants
+  \item Strong Induction
+  \item Structural Induction
+\end{enumerate}
+\end{column}
+\end{columns}
+\medskip
+\centering Each topic: 5 constructive questions with worked solutions.
+\end{frame}
+
+% ================= 1. Proposition =================
+\begin{frame}{1. Proposition (Q1--Q2)}
+\footnotesize
+\qa{1}{Which are propositions? (a) $x+2=5$ (b) Is 7 prime? (c) ``This statement is false.'' (d) Every even integer $>2$ is a sum of two primes. (e) $2+3=5$.}
+{A proposition is a declarative sentence that is exactly one of true or false.\\
+(a) Its truth depends on the value of $x$, so it is a predicate, not a proposition.\\
+(b) A question asserts nothing, so it has no truth value.\\
+(c) If it were true it would be false, and if false it would be true, so no consistent value exists.\\
+(d) This is Goldbach's conjecture. Nobody knows its value, but it is definitely true or false.\\
+(e) True.\\
+\emph{Hence only (d) and (e) are propositions.}}
+\qa{2}{Negate ``If it rains, the match is cancelled.''}
+{Let $p$ = ``it rains'' and $q$ = ``the match is cancelled''. The sentence is $p\to q\equiv\neg p\lor q$.\\
+Negating: $\neg(\neg p\lor q)\equiv p\land\neg q$ (De Morgan).\\
+\emph{Hence the negation is: ``It rains and the match is not cancelled.''} It is the only situation that breaks the promise.}
+\end{frame}
+
+\begin{frame}{1. Proposition (Q3--Q4)}
+\footnotesize
+\qa{3}{Translate ``You can access the site only if you are registered and verified.''}
+{Let $a$ = access, $r$ = registered, $v$ = verified.\\
+``$A$ only if $B$'' says $B$ is necessary for $A$: whenever $A$ holds, $B$ holds. So it is $A\to B$, not $B\to A$.\\
+Here $B$ is ``$r$ and $v$'', so the statement is $a\to(r\land v)$.\\
+\emph{Check:} a registered but unverified user cannot access, since $a$ would make $r\land v$ false.}
+\qa{4}{Build a compound proposition in $p,q,r$ that is true exactly when exactly one of them is true.}
+{List the rows where exactly one variable is T: $(1,0,0)$, $(0,1,0)$, $(0,0,1)$.\\
+Write one conjunction per row, then join with $\lor$:\\
+\centerline{$(p\land\neg q\land\neg r)\lor(\neg p\land q\land\neg r)\lor(\neg p\land\neg q\land r)$}
+Each disjunct is true on exactly one row, so the whole formula is true on exactly those three rows.}
+\end{frame}
+
+\begin{frame}{1. Proposition (Q5)}
+\footnotesize
+\qa{5}{For ``If $n$ is divisible by 6, then $n$ is divisible by 3'' write the converse, inverse and contrapositive. Which are equivalent to the original?}
+{Let $p$ = ``$6\mid n$'' and $q$ = ``$3\mid n$''. The original $p\to q$ is true, since $n=6k=3(2k)$.
+\begin{itemize}\footnotesize
+ \item Converse $q\to p$: if $3\mid n$ then $6\mid n$. False: $n=3$.
+ \item Inverse $\neg p\to\neg q$: if $6\nmid n$ then $3\nmid n$. False: $n=3$.
+ \item Contrapositive $\neg q\to\neg p$: if $3\nmid n$ then $6\nmid n$. True: if $6\mid n$ then $3\mid n$.
+\end{itemize}
+\emph{Hence only the contrapositive is equivalent.} The converse and inverse are equivalent to each other, but not to the original.}
+\end{frame}
+
+% ================= 2. Predicate =================
+\begin{frame}{2. Predicate (Q1--Q2)}
+\footnotesize
+\qa{1}{Let $P(x)$: ``$x$ is prime'' and $E(x)$: ``$x$ is even'' over the integers. Express ``2 is the only even prime.''}
+{The claim has two parts.\\
+\emph{Existence:} 2 is an even prime, i.e.\ $P(2)\land E(2)$.\\
+\emph{Uniqueness:} any integer that is both prime and even must be 2, i.e.\ $\forall x\,((P(x)\land E(x))\to x=2)$.\\
+\emph{Hence:} $P(2)\land E(2)\land\forall x\,((P(x)\land E(x))\to x=2)$.\\
+Without the second part the formula would not rule out other even primes.}
+\qa{2}{Over $\mathbb{R}$ let $P(x,y)$: $x+y=0$. Decide the truth of $\forall x\exists y\,P(x,y)$ and $\exists y\forall x\,P(x,y)$.}
+{$\forall x\exists y$: $y$ may depend on $x$. Given any $x$, choose $y=-x$; then $x+y=0$. \textbf{True.}\\
+$\exists y\forall x$: one $y$ must work for every $x$. Suppose $y_0$ works. Then $x=1-y_0$ gives $x+y_0=1\neq0$. \textbf{False.}\\
+\emph{Hence swapping quantifiers changes meaning.}}
+\end{frame}
+
+\begin{frame}{2. Predicate (Q3--Q4)}
+\footnotesize
+\qa{3}{Find the truth set of $P(x)$: $x^2>x$ over $\mathbb{N}$ and over $\mathbb{R}$.}
+{Rewrite as $x^2-x>0$, i.e.\ $x(x-1)>0$. A product is positive when both factors have the same sign.\\
+Both positive: $x>0$ and $x>1$, so $x>1$. Both negative: $x<0$ and $x<1$, so $x<0$.\\
+Over $\mathbb{R}$ the truth set is $(-\infty,0)\cup(1,\infty)$.\\
+Over $\mathbb{N}=\{0,1,2,\dots\}$ no negatives exist, and $x=0,1$ give equality, so the set is $\{2,3,4,\dots\}$.}
+\qa{4}{Express ``No student failed every exam'' and push the negation inward.}
+{With $F(s,e)$: ``student $s$ failed exam $e$'', the sentence is $\neg\exists s\,\forall e\,F(s,e)$.\\
+Step 1: $\neg\exists s\,(\cdot)\equiv\forall s\,\neg(\cdot)$, giving $\forall s\,\neg\forall e\,F(s,e)$.\\
+Step 2: $\neg\forall e\,(\cdot)\equiv\exists e\,\neg(\cdot)$, giving $\forall s\,\exists e\,\neg F(s,e)$.\\
+\emph{Reading back:} every student passed at least one exam.}
+\end{frame}
+
+\begin{frame}{2. Predicate (Q5)}
+\footnotesize
+\qa{5}{Over positive integers let $D(x,y)$: ``$x$ divides $y$''. Find all $x$ with $D(x,12)\land D(x,18)$.}
+{Divisors of 12: $\{1,2,3,4,6,12\}$. Divisors of 18: $\{1,2,3,6,9,18\}$.\\
+The truth set of $D(x,12)\land D(x,18)$ is the intersection: $\{1,2,3,6\}$.\\
+\emph{Cross-check:} $\gcd(12,18)=6$, and the common divisors of two numbers are exactly the divisors of their gcd, namely $1,2,3,6$.}
+\end{frame}
+
+% ================= 3. Quantifiers =================
+\begin{frame}{3. Quantifiers (Q1--Q2)}
+\footnotesize
+\qa{1}{Negate the $\varepsilon$--$\delta$ statement of continuity at $a$: $\forall\varepsilon>0\,\exists\delta>0\,\forall x\,(|x-a|<\delta\to|f(x)-f(a)|<\varepsilon)$.}
+{Move the negation across one symbol at a time.\\
+$\forall\varepsilon\to\exists\varepsilon$, then $\exists\delta\to\forall\delta$, then $\forall x\to\exists x$.\\
+Inside, $\neg(p\to q)\equiv p\land\neg q$.\\
+\emph{Result:} $\exists\varepsilon>0\,\forall\delta>0\,\exists x\,(|x-a|<\delta\land|f(x)-f(a)|\ge\varepsilon)$.\\
+In words: some tolerance $\varepsilon$ exists such that, however small $\delta$ is, an $x$ within $\delta$ of $a$ has $f(x)$ at least $\varepsilon$ away from $f(a)$.}
+\qa{2}{Is $\forall x\exists y\,(y^2=x)$ true over $\mathbb{R}$? Over $\mathbb{R}_{\ge0}$?}
+{Over $\mathbb{R}$: take $x=-1$. No real $y$ has $y^2=-1$, so the statement is \textbf{false}.\\
+Over $\mathbb{R}_{\ge0}$: for any $x\ge0$ choose $y=\sqrt x$, which is real. \textbf{True.}\\
+\emph{The domain decides the truth value.}}
+\end{frame}
+
+\begin{frame}{3. Quantifiers (Q3--Q4)}
+\footnotesize
+\qa{3}{Show that $\forall x(P(x)\lor Q(x))$ is not equivalent to $\forall x\,P(x)\lor\forall x\,Q(x)$.}
+{It is enough to give one structure where they differ. Take domain $\mathbb{Z}$, $P(x)$ = ``$x$ is even'', $Q(x)$ = ``$x$ is odd''.\\
+Left side: every integer is even or odd, so it is \textbf{true}.\\
+Right side: ``all integers are even'' is false ($1$), and ``all are odd'' is false ($2$), so it is \textbf{false}.\\
+\emph{Hence $\forall$ does not distribute over $\lor$.} (By contrast $\forall x(P\land Q)\equiv\forall xP\land\forall xQ$.)}
+\qa{4}{Express ``exactly two elements satisfy $P$.''}
+{We need ``at least two'' and ``no third''.\\
+At least two: $\exists x\exists y\,(x\ne y\land P(x)\land P(y))$.\\
+No others: $\forall z\,(P(z)\to(z=x\lor z=y))$.\\
+\emph{Combined:} $\exists x\exists y\,[x\ne y\land P(x)\land P(y)\land\forall z\,(P(z)\to(z=x\lor z=y))]$.}
+\end{frame}
+
+\begin{frame}{3. Quantifiers (Q5)}
+\footnotesize
+\qa{5}{Define $\exists!x\,P(x)$ using only $\exists$, $\forall$, $=$. Is $\exists!x\,(x^2=4)$ true over $\mathbb{R}$? Over $\mathbb{R}^{+}$?}
+{``Exactly one'' means a witness exists and any other witness equals it:\\
+\centerline{$\exists!x\,P(x)\equiv\exists x\,[P(x)\land\forall y\,(P(y)\to y=x)]$.}
+Over $\mathbb{R}$ the solutions of $x^2=4$ are $2$ and $-2$, so uniqueness fails: \textbf{false}.\\
+Over $\mathbb{R}^{+}$ only $2$ qualifies, so \textbf{true}.}
+\end{frame}
+
+% ================= 4. Truth Table =================
+\begin{frame}{4. Truth Table (Q1)}
+\footnotesize
+\textbf{Q1.} Show $((p\to q)\land(q\to r))\to(p\to r)$ is a tautology.\par\smallskip
+\centering
+\begin{tabular}{ccc|c|c|c|c|c}
+\toprule
+$p$&$q$&$r$&$p\to q$&$q\to r$&$(p\to q)\land(q\to r)$&$p\to r$&Whole\\
+\midrule
+T&T&T&T&T&T&T&T\\
+T&T&F&T&F&F&F&T\\
+T&F&T&F&T&F&T&T\\
+T&F&F&F&T&F&F&T\\
+F&T&T&T&T&T&T&T\\
+F&T&F&T&F&F&T&T\\
+F&F&T&T&T&T&T&T\\
+F&F&F&T&T&T&T&T\\
+\bottomrule
+\end{tabular}\par\smallskip
+{\color{ans}\raggedright\textbf{Solution.} With 3 variables there are $2^3=8$ rows. The last column is T in every row, so the formula is a tautology (hypothetical syllogism). The only rows where the antecedent is T are rows 1, 5, 7, 8, and there $p\to r$ is T too.\par}
+\end{frame}
+
+\begin{frame}{4. Truth Table (Q2--Q3)}
+\footnotesize
+\qa{2}{Verify $p\oplus q\equiv(p\lor q)\land\neg(p\land q)$.}
+{\centering
+\begin{tabular}{cc|c|c|c|c}
+\toprule
+$p$&$q$&$p\oplus q$&$p\lor q$&$\neg(p\land q)$&RHS\\
+\midrule
+T&T&F&T&F&F\\
+T&F&T&T&T&T\\
+F&T&T&T&T&T\\
+F&F&F&F&T&F\\
+\bottomrule
+\end{tabular}\par\smallskip
+\raggedright The columns $p\oplus q$ and RHS agree in all four rows, so the two formulas are equivalent.}
+\qa{3}{For a formula with $n$ variables, how many rows does its truth table have, and how many distinct formulas (up to equivalence) exist? Evaluate for $n=3$.}
+{Each variable is T or F independently, so there are $2^n$ rows. A formula is determined by its output column; each of the $2^n$ rows can output T or F independently, so there are $2^{2^n}$ possible columns.\\
+For $n=3$: $8$ rows and $2^8=256$ distinct functions.}
+\end{frame}
+
+\begin{frame}{4. Truth Table (Q4--Q5)}
+\footnotesize
+\qa{4}{Decide whether $(p\lor q)\to r\equiv(p\to r)\land(q\to r)$.}
+{\emph{Algebraic route.} $(p\lor q)\to r\equiv\neg(p\lor q)\lor r\equiv(\neg p\land\neg q)\lor r$. By distributivity this is $(\neg p\lor r)\land(\neg q\lor r)\equiv(p\to r)\land(q\to r)$.\\
+\emph{Truth-table check.} The left side is false only when $r=\mathrm{F}$ and ($p$ or $q$) is T. The right side is false only when $r=\mathrm{F}$ and ($p=$T or $q=$T). The falsifying rows coincide.\\
+\emph{Hence they are equivalent.}}
+\qa{5}{Construct formulas for: (a) true only on rows TT and FF of $(p,q)$; (b) the 3-variable majority function.}
+{(a) Write one conjunction for each true row and join them: $(p\land q)\lor(\neg p\land\neg q)$, which is $p\leftrightarrow q$.\\
+(b) Majority is true when at least two of $p,q,r$ are T. Each pair gives a disjunct: $(p\land q)\lor(p\land r)\lor(q\land r)$. This covers TTT, TTF, TFT, FTT and no other row.}
+\end{frame}
+
+% ================= 5. First Order Logic =================
+\begin{frame}{5. First Order Logic (Q1--Q2)}
+\footnotesize
+\qa{1}{Using $\mathrm{Student}(x)$, $\mathrm{Course}(y)$, $\mathrm{Takes}(x,y)$, write ``Some student takes every course.''}
+{We need one student $x$ such that for all $y$, if $y$ is a course then $x$ takes $y$.\\
+\centerline{$\exists x\,[\mathrm{Student}(x)\land\forall y\,(\mathrm{Course}(y)\to\mathrm{Takes}(x,y))]$}
+The $\exists$ is paired with $\land$ and the $\forall$ with $\to$. Swapping them would change the meaning.}
+\qa{2}{Give a structure where $\forall x\exists y\,R(x,y)$ is true but $\exists y\forall x\,R(x,y)$ is false.}
+{Take domain $\mathbb{N}$ and $R(x,y)$ interpreted as $x<y$.\\
+$\forall x\exists y$: for any $x$, choose $y=x+1$. True.\\
+$\exists y\forall x$: a single $y$ would have to exceed every $x$, including $x=y$, and $y<y$ is false. False.}
+\end{frame}
+
+\begin{frame}{5. First Order Logic (Q3--Q4)}
+\footnotesize
+\qa{3}{Express ``$f$ is injective'' and ``$f$ is surjective''. Test $f(n)=2n$ on $\mathbb{Z}$.}
+{Injective: $\forall x\forall y\,(f(x)=f(y)\to x=y)$. Surjective: $\forall y\exists x\,f(x)=y$.\\
+Injective test: $2x=2y$ gives $x=y$, so yes.\\
+Surjective test: for $y=1$ we would need $2x=1$, impossible in $\mathbb{Z}$, so no.\\
+\emph{Hence $f$ is injective but not surjective.}}
+\qa{4}{Show $\forall x\,P(x)\to\exists x\,P(x)$ is valid in first order logic.}
+{Validity means true in every structure. By the usual convention a structure's domain is nonempty. Suppose $\forall x\,P(x)$ holds in some structure, and pick any element $a$ of its domain. Then $P(a)$ holds, so $\exists x\,P(x)$ holds. If the antecedent fails, the implication is true anyway.\\
+\emph{Hence it is valid.} (With empty domains allowed it would fail.)}
+\end{frame}
+
+\begin{frame}{5. First Order Logic (Q5)}
+\footnotesize
+\qa{5}{Show $\{\forall x(P(x)\to Q(x)),\ \exists x\,P(x)\}\models\exists x\,Q(x)$.}
+{Let a structure make both premises true.\\
+Step 1: by $\exists x\,P(x)$ there is an element $a$ with $P(a)$.\\
+Step 2: instantiate $\forall x(P(x)\to Q(x))$ at $a$ to get $P(a)\to Q(a)$.\\
+Step 3: modus ponens gives $Q(a)$.\\
+Step 4: so some element satisfies $Q$, i.e.\ $\exists x\,Q(x)$.\\
+\emph{Hence the conclusion holds in every structure satisfying the premises.}}
+\end{frame}
+
+% ================= 6. Satisfiability =================
+\begin{frame}{6. Satisfiability (Q1--Q2)}
+\footnotesize
+\qa{1}{Is $(p\lor q)\land(\neg p\lor q)\land(p\lor\neg q)\land(\neg p\lor\neg q)$ satisfiable?}
+{Each clause is false for exactly one assignment of $(p,q)$:\\
+$p\lor q$ is false at FF; $\neg p\lor q$ at TF; $p\lor\neg q$ at FT; $\neg p\lor\neg q$ at TT.\\
+The four clauses cover all four assignments, so every assignment falsifies one clause.\\
+\emph{Hence the formula is unsatisfiable.}}
+\qa{2}{Find a satisfying assignment for $(p\lor\neg q)\land(q\lor r)\land(\neg p\lor\neg r)$.}
+{Try $p=\mathrm{T}$. The third clause forces $r=\mathrm{F}$, and then the second forces $q=\mathrm{T}$. Check: clause 1 is T$\lor$F $=$T, clause 2 is T$\lor$F $=$T, clause 3 is F$\lor$T $=$T.\\
+\emph{Hence $p=$T, $q=$T, $r=$F satisfies it.}}
+\end{frame}
+
+\begin{frame}{6. Satisfiability (Q3--Q4)}
+\footnotesize
+\qa{3}{Use ``$A$ is valid iff $\neg A$ is unsatisfiable'' to show $((p\to q)\land p)\to q$ is valid.}
+{Negate: $\neg(((p\to q)\land p)\to q)\equiv(p\to q)\land p\land\neg q$.\\
+Suppose some assignment satisfies it. Then $p$ is T and $p\to q$ is T, so $q$ is T. But $\neg q$ is also T, a contradiction.\\
+So the negation is unsatisfiable. \emph{Hence the original is valid (modus ponens).}}
+\qa{4}{Show that $\forall x\exists y\,R(x,y)\land\forall x\,\neg R(x,x)\land(R\text{ transitive})$ is satisfiable but has no finite model.}
+{\emph{Satisfiable:} $(\mathbb{N},<)$ works: every number has a larger one, $x<x$ never holds, and $<$ is transitive.\\
+\emph{No finite model:} suppose one existed. Start at $a_0$ and pick $a_{i+1}$ with $R(a_i,a_{i+1})$. By transitivity $R(a_i,a_j)$ for all $i<j$. A finite domain forces a repeat $a_i=a_j$ with $i<j$, giving $R(a,a)$, contradicting irreflexivity. So every model is infinite.}
+\end{frame}
+
+\begin{frame}{6. Satisfiability (Q5)}
+\footnotesize
+\qa{5}{Encode ``2-colour the triangle $a,b,c$ with colours T/F'' as clauses. Is it satisfiable?}
+{Let each variable be the colour of a vertex. An edge $(u,v)$ needs different colours: $(u\lor v)\land(\neg u\lor\neg v)$.\\
+Edges: $(a\lor b)\land(\neg a\lor\neg b)$, $(b\lor c)\land(\neg b\lor\neg c)$, $(a\lor c)\land(\neg a\lor\neg c)$.\\
+From the first two edges, $a\ne b$ and $b\ne c$, so with only two colours $a=c$. The third edge demands $a\ne c$, a contradiction.\\
+\emph{Hence the formula is unsatisfiable: a triangle is not 2-colourable.}}
+\end{frame}
+
+% ================= 7. Patterns of Proof =================
+\begin{frame}{7. Patterns of Proof (Q1--Q2)}
+\footnotesize
+\qa{1 (cases)}{Prove $n^2+n$ is even for every integer $n$.}
+{Every integer is even or odd, so use two cases.\\
+\emph{Case 1:} $n=2k$. Then $n^2+n=4k^2+2k=2(2k^2+k)$.\\
+\emph{Case 2:} $n=2k+1$. Then $n^2+n=4k^2+4k+1+2k+1=2(2k^2+3k+1)$.\\
+Both are even. \emph{Hence $n^2+n$ is even for all $n$.}}
+\qa{2 (cases)}{Prove $3\mid n^3-n$ for every integer $n$.}
+{Factor: $n^3-n=(n-1)\,n\,(n+1)$. Split by the remainder of $n$ modulo 3.\\
+\emph{Case $n=3k$:} the factor $n$ is divisible by 3.\\
+\emph{Case $n=3k+1$:} the factor $n-1=3k$ is divisible by 3.\\
+\emph{Case $n=3k+2$:} the factor $n+1=3(k+1)$ is divisible by 3.\\
+\emph{Hence in every case the product is divisible by 3.}}
+\end{frame}
+
+\begin{frame}{7. Patterns of Proof (Q3--Q4)}
+\footnotesize
+\qa{3 (direct proof of an implication)}{Prove: if $a\mid b$ and $b\mid c$ then $a\mid c$.}
+{Assume $a\mid b$ and $b\mid c$. By definition there are integers $k,m$ with $b=ak$ and $c=bm$.\\
+Substitute: $c=(ak)m=a(km)$, and $km$ is an integer.\\
+\emph{Hence $a\mid c$.}}
+\qa{4 (contrapositive)}{Prove: if $n^2$ is even then $n$ is even.}
+{A direct proof is awkward, so prove the contrapositive: if $n$ is odd then $n^2$ is odd.\\
+Let $n=2k+1$. Then $n^2=4k^2+4k+1=2(2k^2+2k)+1$, which is odd.\\
+\emph{Since an implication equals its contrapositive, the original statement is proved.}}
+\end{frame}
+
+\begin{frame}{7. Patterns of Proof (Q5)}
+\footnotesize
+\qa{5 (contradiction)}{Prove that the sum of a rational $q$ and an irrational $x$ is irrational.}
+{Assume the opposite: $q+x=r$ for some rational $r$.\\
+Then $x=r-q$. The difference of two rationals is rational, so $x$ would be rational.\\
+This contradicts the hypothesis that $x$ is irrational.\\
+\emph{Hence $q+x$ is irrational.}}
+\end{frame}
+
+% ================= 8. Iff =================
+\begin{frame}{8. Proving If and Only If (Q1--Q2)}
+\footnotesize
+\qa{1}{For integers $a,b$ prove: $a+b$ is even $\iff$ $a$ and $b$ have the same parity.}
+{($\Leftarrow$) If both are even, $a=2k$, $b=2m$ and $a+b=2(k+m)$. If both are odd, $a=2k+1$, $b=2m+1$ and $a+b=2(k+m+1)$. Either way the sum is even.\\
+($\Rightarrow$) Contrapositive: suppose the parities differ, say $a=2k$, $b=2m+1$. Then $a+b=2(k+m)+1$ is odd.\\
+\emph{Both directions hold, so the equivalence is proved.}}
+\qa{2}{For nonzero integers prove: ($a\mid b$ and $b\mid a$) $\iff$ $a=\pm b$.}
+{($\Rightarrow$) Write $b=ak$ and $a=bm$. Then $a=akm$, and since $a\ne0$, $km=1$. Integers with product 1 are $\pm1$, so $k=\pm1$ and $b=\pm a$.\\
+($\Leftarrow$) If $a=\pm b$ then $b=(\pm1)a$ and $a=(\pm1)b$, so each divides the other.}
+\end{frame}
+
+\begin{frame}{8. Proving If and Only If (Q3--Q4)}
+\footnotesize
+\qa{3}{For real $x$ prove $|x|<3\iff-3<x<3$.}
+{\emph{Case $x\ge0$:} $|x|=x$, so $|x|<3\iff x<3$; and $x\ge0>-3$ already, so this is $-3<x<3$.\\
+\emph{Case $x<0$:} $|x|=-x$, so $|x|<3\iff-x<3\iff x>-3$; and $x<0<3$ already, so this is $-3<x<3$.\\
+Every step in both cases is reversible, so the equivalence holds.}
+\qa{4}{For $a,b>0$ prove $a<b\iff a^2<b^2$.}
+{($\Rightarrow$) $b^2-a^2=(b-a)(b+a)$. Here $b-a>0$ and $b+a>0$, so the product is positive.\\
+($\Leftarrow$) Contrapositive: suppose $a\ge b$. Since both are positive, $a^2\ge ab\ge b^2$, so $a^2\ge b^2$, i.e.\ $a^2<b^2$ fails.}
+\end{frame}
+
+\begin{frame}{8. Proving If and Only If (Q5)}
+\footnotesize
+\qa{5}{Show $p\leftrightarrow q\equiv\neg p\leftrightarrow\neg q$.}
+{$p\leftrightarrow q$ is true exactly when $p$ and $q$ have the same truth value.\\
+Negating both variables turns T into F and F into T on both sides, so equal values stay equal and different values stay different.\\
+\emph{Truth table:} on $(p,q)=$ TT, TF, FT, FF, the left side is T, F, F, T and the right side (with inputs FF, FT, TF, TT) is T, F, F, T. The columns match.}
+\end{frame}
+
+% ================= 9. Sets =================
+\begin{frame}{9. Proving Sets and Set Equations (Q1--Q2)}
+\footnotesize
+\qa{1}{Prove $A\cap(B\cup C)=(A\cap B)\cup(A\cap C)$ by the element method.}
+{Take an arbitrary $x$ and chain equivalences:\\
+$x\in A\cap(B\cup C)\iff x\in A\land(x\in B\lor x\in C)$\\
+$\iff(x\in A\land x\in B)\lor(x\in A\land x\in C)$ (distributivity of $\land$ over $\lor$)\\
+$\iff x\in(A\cap B)\cup(A\cap C)$.\\
+Both sets have exactly the same elements, so they are equal.}
+\qa{2}{Prove $A\setminus(B\cap C)=(A\setminus B)\cup(A\setminus C)$ by set algebra.}
+{Use $X\setminus Y=X\cap Y^c$.\\
+$A\setminus(B\cap C)=A\cap(B\cap C)^c=A\cap(B^c\cup C^c)$ (De Morgan)\\
+$=(A\cap B^c)\cup(A\cap C^c)$ (distributivity) $=(A\setminus B)\cup(A\setminus C)$.}
+\end{frame}
+
+\begin{frame}{9. Proving Sets and Set Equations (Q3--Q4)}
+\footnotesize
+\qa{3}{Prove $A\subseteq B\iff A\cup B=B$.}
+{($\Rightarrow$) Assume $A\subseteq B$. Always $B\subseteq A\cup B$. Conversely, let $x\in A\cup B$: if $x\in A$ then $x\in B$ by assumption, otherwise $x\in B$ directly. So $A\cup B=B$.\\
+($\Leftarrow$) Assume $A\cup B=B$. If $x\in A$ then $x\in A\cup B=B$. So $A\subseteq B$.}
+\qa{4}{Prove or disprove $(A\cup B)\setminus C=A\cup(B\setminus C)$.}
+{Try small sets: $A=\{1\}$, $B=\varnothing$, $C=\{1\}$.\\
+Left: $(\{1\}\cup\varnothing)\setminus\{1\}=\varnothing$. Right: $\{1\}\cup(\varnothing\setminus\{1\})=\{1\}$.\\
+\emph{They differ, so the identity is false.} The correct version is $(A\cup B)\setminus C=(A\setminus C)\cup(B\setminus C)$.}
+\end{frame}
+
+\begin{frame}{9. Proving Sets and Set Equations (Q5)}
+\footnotesize
+\qa{5}{Prove $\mathcal{P}(A)\cap\mathcal{P}(B)=\mathcal{P}(A\cap B)$. Does $\mathcal{P}(A)\cup\mathcal{P}(B)=\mathcal{P}(A\cup B)$?}
+{\emph{Intersection:} $X\in\mathcal P(A)\cap\mathcal P(B)\iff X\subseteq A\land X\subseteq B\iff X\subseteq A\cap B\iff X\in\mathcal P(A\cap B)$.\\
+\emph{Union:} the inclusion $\subseteq$ always holds, but equality fails. Take $A=\{1\}$, $B=\{2\}$. Then $\{1,2\}\in\mathcal P(A\cup B)$, but $\{1,2\}\not\subseteq A$ and $\{1,2\}\not\subseteq B$, so it is in neither $\mathcal P(A)$ nor $\mathcal P(B)$.}
+\end{frame}
+
+% ================= 10. Russell =================
+\begin{frame}{10. Russell's Paradox (Q1--Q2)}
+\footnotesize
+\qa{1}{Derive Russell's paradox.}
+{Naive comprehension allows $R=\{x\mid x\notin x\}$. Ask whether $R\in R$.\\
+If $R\in R$, then $R$ must satisfy the defining condition, so $R\notin R$.\\
+If $R\notin R$, then $R$ satisfies the condition, so $R\in R$.\\
+Both cases give a contradiction. \emph{Hence unrestricted set formation is inconsistent.}}
+\qa{2}{(Cantor) Show there is no surjection $f:A\to\mathcal P(A)$, using a Russell-style set.}
+{Suppose $f$ is onto. Define $D=\{a\in A\mid a\notin f(a)\}\subseteq A$. Then $D\in\mathcal P(A)$, so $D=f(d)$ for some $d\in A$.\\
+Is $d\in D$? $d\in D\iff d\notin f(d)=D$. So $d\in D\iff d\notin D$, a contradiction.\\
+\emph{Hence no surjection exists, and $\mathcal P(A)$ is strictly larger than $A$.}}
+\end{frame}
+
+\begin{frame}{10. Russell's Paradox (Q3--Q4)}
+\footnotesize
+\qa{3}{How does the Separation axiom avoid the paradox?}
+{Separation only allows $\{x\in A\mid\varphi(x)\}$ where $A$ is already a set.\\
+Form $R_A=\{x\in A\mid x\notin x\}$. If $R_A\in A$, then $R_A\in R_A\iff R_A\notin R_A$, a contradiction. So $R_A\notin A$.\\
+\emph{Hence the construction just shows that $R_A$ is a set outside $A$; no paradox arises.}}
+\qa{4}{Prove there is no set of all sets.}
+{Suppose $V$ is a set containing every set. By Separation, $R=\{x\in V\mid x\notin x\}$ is a set, so $R\in V$.\\
+But the previous answer showed $R\notin V$. Contradiction.\\
+\emph{Hence no universal set exists.}}
+\end{frame}
+
+\begin{frame}{10. Russell's Paradox (Q5)}
+\footnotesize
+\qa{5}{Show the Grelling--Nelson paradox has the same structure: call a word ``heterological'' if it does not describe itself.}
+{``Short'' is a short word, so it describes itself (autological). ``Long'' is not long, so it is heterological.\\
+Is ``heterological'' heterological?\\
+If yes, it does not describe itself, so it is not heterological. If no, it describes itself, so it \emph{is} heterological.\\
+This is Russell's argument with ``word describes itself'' in place of $x\in x$.}
+\end{frame}
+
+% ================= 11. WOP =================
+\begin{frame}{11. Well Ordering Principle (Q1--Q2)}
+\footnotesize
+\qa{1}{State the principle. Does it hold for $\mathbb{Z}$, $\mathbb{Q}_{\ge0}$ and $[0,1]$?}
+{\emph{WOP:} every nonempty subset of $\mathbb{N}$ has a least element.\\
+$\mathbb{Z}$: the subset of negative integers has no least element.\\
+$\mathbb{Q}_{\ge0}$: the positive rationals have no minimum, since $q/2$ is always smaller.\\
+$[0,1]$: the subset $(0,1]$ has no minimum for the same reason.\\
+\emph{Hence WOP is special to $\mathbb{N}$ (and sets order-isomorphic to it).}}
+\qa{2}{Use WOP to prove every positive integer is a sum of distinct powers of 2.}
+{Suppose not, and let $n$ be the least counterexample. $n\ne1=2^0$.\\
+Let $2^k$ be the largest power of 2 with $2^k\le n$. If $n=2^k$ we are done, so $n>2^k$. Put $m=n-2^k$. Then $0<m<2^k$ (since $n<2^{k+1}$) and $m<n$.\\
+By minimality of $n$, $m$ is a sum of distinct powers of 2, all at most $m<2^k$. Adding $2^k$ gives a representation of $n$ with distinct powers. Contradiction.}
+\end{frame}
+
+\begin{frame}{11. Well Ordering Principle (Q3--Q4)}
+\footnotesize
+\qa{3}{Use WOP to show every integer $n>1$ has a prime divisor.}
+{Let $S$ be the set of divisors of $n$ that exceed 1. It is nonempty because $n\in S$. Let $d$ be its least element.\\
+Suppose $d$ is not prime. Then $d=ab$ with $1<a<d$. Since $a\mid d$ and $d\mid n$, also $a\mid n$, so $a\in S$ and $a<d$, contradicting minimality.\\
+\emph{Hence $d$ is a prime divisor of $n$.}}
+\qa{4}{Use WOP to prove $1+2+\cdots+n=\frac{n(n+1)}{2}$ for all $n\ge1$.}
+{Suppose the set of counterexamples is nonempty and let $m$ be its least element. $m\ne1$ because $1=\frac{1\cdot2}{2}$.\\
+So $m-1\ge1$ is not a counterexample: $1+\cdots+(m-1)=\frac{(m-1)m}{2}$. Adding $m$: $\frac{m(m-1)}{2}+m=\frac{m(m+1)}{2}$.\\
+So $m$ satisfies the formula, a contradiction.}
+\end{frame}
+
+\begin{frame}{11. Well Ordering Principle (Q5)}
+\footnotesize
+\qa{5}{Use WOP to prove the division algorithm: for $a\in\mathbb Z$ and $b>0$ there exist $q,r$ with $a=bq+r$ and $0\le r<b$.}
+{Let $S=\{a-bk\mid k\in\mathbb Z,\ a-bk\ge0\}$. It is nonempty: $k=-|a|$ gives $a+b|a|\ge a+|a|\ge0$.\\
+By WOP, $S$ has a least element $r=a-bq$, and $r\ge0$ by definition.\\
+Suppose $r\ge b$. Then $r-b=a-b(q+1)\ge0$ lies in $S$ and is smaller than $r$, contradicting minimality. So $r<b$.\\
+\emph{Hence $a=bq+r$ with $0\le r<b$.}}
+\end{frame}
+
+% ================= 12. Induction & Invariants =================
+\begin{frame}{12. Induction and Invariants (Q1--Q2)}
+\footnotesize
+\qa{1}{Prove $1^3+2^3+\cdots+n^3=\left(\frac{n(n+1)}{2}\right)^2$ for all $n\ge1$.}
+{\emph{Base} $n=1$: both sides equal 1.\\
+\emph{Step:} assume it holds for $n$. Then $\sum_{i=1}^{n+1}i^3=\frac{n^2(n+1)^2}{4}+(n+1)^3=(n+1)^2\cdot\frac{n^2+4n+4}{4}=\frac{(n+1)^2(n+2)^2}{4}$,\\
+which is the formula for $n+1$. \emph{By induction it holds for all $n\ge1$.}}
+\qa{2}{Prove $7^n-1$ is divisible by 6 for all $n\ge0$.}
+{\emph{Base} $n=0$: $7^0-1=0$, divisible by 6.\\
+\emph{Step:} assume $6\mid7^n-1$. Then $7^{n+1}-1=7(7^n-1)+6$. The first term is divisible by 6 by hypothesis and the second is $6$. So $6\mid7^{n+1}-1$.}
+\end{frame}
+
+\begin{frame}{12. Induction and Invariants (Q3--Q4)}
+\footnotesize
+\qa{3}{Prove $2^n>n^2$ for all $n\ge5$.}
+{\emph{Base} $n=5$: $32>25$.\\
+\emph{Step:} assume $2^n>n^2$ with $n\ge5$. Then $2^{n+1}=2\cdot2^n>2n^2$. It suffices that $2n^2\ge(n+1)^2$, i.e.\ $n^2\ge2n+1$, i.e.\ $(n-1)^2\ge2$, true for $n\ge3$. So $2^{n+1}>(n+1)^2$.}
+\qa{4 (invariant)}{A robot starts at $(0,0)$ and moves $(+1,+2)$ or $(+2,+1)$. Can it reach $(1,1)$? $(3,3)$?}
+{Each move adds 3 to $x+y$. \emph{Invariant:} after any number of moves, $x+y\equiv0\pmod3$ (true at the start, preserved by each move).\\
+$(1,1)$: $x+y=2\not\equiv0$, so it is unreachable.\\
+$(3,3)$: $x+y=6\equiv0$, and the moves $(+1,+2)$ then $(+2,+1)$ reach it.}
+\end{frame}
+
+\begin{frame}{12. Induction and Invariants (Q5)}
+\footnotesize
+\qa{5 (invariant)}{The numbers $1,2,\dots,10$ are on a board. Repeatedly erase two numbers $a,b$ and write $|a-b|$. What can you say about the last number?}
+{\emph{Invariant:} the parity of the sum of all numbers on the board.\\
+Replacing $a,b$ by $|a-b|$ changes the sum by $a+b-|a-b|$, which is $2\min(a,b)$, an even number. So the parity of the sum never changes.\\
+The initial sum is $55$, which is odd. The last remaining number is the sum, so it is \textbf{odd}.}
+\end{frame}
+
+% ================= 13. Strong Induction =================
+\begin{frame}{13. Strong Induction (Q1--Q2)}
+\footnotesize
+\qa{1}{A shop accepts only 4-rupee and 7-rupee coins. Prove every amount $n\ge18$ can be paid exactly.}
+{Claim: $n=4a+7b$ for some $a,b\ge0$.\\
+\emph{Base cases:} $18=4+14$, $19=12+7$, $20=20$, $21=21$ (using 4 coins and 7 coins as needed).\\
+\emph{Step:} let $n\ge22$ and assume the claim for all $18\le m<n$. Since $n-4\ge18$, $n-4=4a+7b$, so $n=4(a+1)+7b$.\\
+Four base cases are needed because the step reaches back by 4.}
+\qa{2}{A pile of $n\ge1$ coins is split repeatedly into two nonempty piles until all piles are single coins. Splitting piles of sizes $x$ and $y$ scores $xy$. Prove the total score is $\frac{n(n-1)}{2}$ however the splits are chosen.}
+{\emph{Base} $n=1$: no split, score $0=\frac{1\cdot0}{2}$.\\
+\emph{Step:} the first split gives piles of $k$ and $n-k$ ($1\le k<n$) and scores $k(n-k)$. By the strong hypothesis the rest score $\frac{k(k-1)}{2}+\frac{(n-k)(n-k-1)}{2}$.\\
+Total $=\frac{2k(n-k)+k^2+(n-k)^2-n}{2}=\frac{n^2-n}{2}$.}
+\end{frame}
+
+\begin{frame}{13. Strong Induction (Q3--Q4)}
+\footnotesize
+\qa{3}{With $F_1=F_2=1$ and $F_n=F_{n-1}+F_{n-2}$, prove $F_n<2^n$ for all $n\ge1$.}
+{\emph{Base cases:} $F_1=1<2$ and $F_2=1<4$.\\
+\emph{Step:} for $n\ge3$ assume $F_k<2^k$ for all $k<n$. Then $F_n=F_{n-1}+F_{n-2}<2^{n-1}+2^{n-2}<2^{n-1}+2^{n-1}=2^n$.\\
+Strong induction is needed because $F_n$ depends on two earlier terms.}
+\qa{4}{Prove every integer $n\ge2$ is a product of primes.}
+{Assume it holds for all $m$ with $2\le m<n$.\\
+If $n$ is prime, it is a product of one prime.\\
+Otherwise $n=ab$ with $2\le a,b<n$. By the hypothesis both $a$ and $b$ are products of primes, so $n=ab$ is as well.}
+\end{frame}
+
+\begin{frame}{13. Strong Induction (Q5)}
+\footnotesize
+\qa{5}{Let $J_0=0$, $J_1=1$ and $J_n=J_{n-1}+2J_{n-2}$. Prove $J_n=\frac{2^n-(-1)^n}{3}$.}
+{\emph{Base cases:} $J_0=\frac{1-1}{3}=0$ and $J_1=\frac{2+1}{3}=1$.\\
+\emph{Step:} for $n\ge2$ assume the formula for $n-1$ and $n-2$. Then\\
+$3J_n=[2^{n-1}-(-1)^{n-1}]+2[2^{n-2}-(-1)^{n-2}]=2^n+(-1)^n-2(-1)^n=2^n-(-1)^n$,\\
+using $-(-1)^{n-1}=(-1)^n$ and $(-1)^{n-2}=(-1)^n$. Dividing by 3 gives the formula.}
+\end{frame}
+
+% ================= 14. Structural Induction =================
+\begin{frame}{14. Structural Induction (Q1--Q2)}
+\footnotesize
+\qa{1}{Define string length recursively and prove $|xy|=|x|+|y|$.}
+{Define $|\varepsilon|=0$ and $|wa|=|w|+1$ for a symbol $a$. Induct on the structure of $y$.\\
+\emph{Base} $y=\varepsilon$: $|x\varepsilon|=|x|=|x|+0=|x|+|\varepsilon|$.\\
+\emph{Step} $y=wa$ with $|xw|=|x|+|w|$: $|xwa|=|xw|+1=|x|+|w|+1=|x|+|wa|$.}
+\qa{2}{A full binary tree is a single node, or a root with two full subtrees. Prove \#leaves $=$ \#internal nodes $+1$.}
+{\emph{Base:} a single node has 1 leaf and 0 internal nodes, and $1=0+1$.\\
+\emph{Step:} let $T$ have subtrees $T_1,T_2$ with leaves $\ell_1,\ell_2$ and internal nodes $i_1,i_2$, where $\ell_j=i_j+1$. Then $T$ has $\ell_1+\ell_2=i_1+i_2+2$ leaves and $i_1+i_2+1$ internal nodes (the new root). So leaves $=$ internal $+1$.}
+\end{frame}
+
+\begin{frame}{14. Structural Induction (Q3--Q4)}
+\footnotesize
+\qa{3}{Well-formed formulas are built from variables, $(\neg A)$ and $(A\ast B)$. Prove each wff has equally many ``('' and ``)''.}
+{\emph{Base:} a variable has 0 of each.\\
+\emph{Step $(\neg A)$:} $A$ has $n$ of each by hypothesis; $(\neg A)$ adds one ``('' and one ``)'', giving $n+1$ of each.\\
+\emph{Step $(A\ast B)$:} $A$ has $n$ and $B$ has $m$ of each; adding one pair gives $n+m+1$ of each.}
+\qa{4}{Let $S$ be defined by: $3\in S$; if $x,y\in S$ then $x+y\in S$. Prove every element of $S$ is divisible by 3. Which numbers does $S$ contain?}
+{\emph{Base:} $3\mid3$. \emph{Step:} if $3\mid x$ and $3\mid y$ then $3\mid x+y$.\\
+\emph{Contents:} $S=\{3,6,9,\dots\}$, the positive multiples of 3, since $3k=3+3+\cdots+3$ ($k$ terms) is built by repeated use of the rule.}
+\end{frame}
+
+\begin{frame}{14. Structural Induction (Q5)}
+\footnotesize
+\qa{5}{Define $\mathrm{rev}(\varepsilon)=\varepsilon$ and $\mathrm{rev}(wa)=a\cdot\mathrm{rev}(w)$. Prove $\mathrm{rev}(xy)=\mathrm{rev}(y)\cdot\mathrm{rev}(x)$.}
+{Induct on $y$.\\
+\emph{Base} $y=\varepsilon$: $\mathrm{rev}(x)=\varepsilon\cdot\mathrm{rev}(x)=\mathrm{rev}(\varepsilon)\cdot\mathrm{rev}(x)$.\\
+\emph{Step} $y=wa$, assuming $\mathrm{rev}(xw)=\mathrm{rev}(w)\cdot\mathrm{rev}(x)$:\\
+$\mathrm{rev}(xwa)=a\cdot\mathrm{rev}(xw)=a\cdot\mathrm{rev}(w)\cdot\mathrm{rev}(x)=\mathrm{rev}(wa)\cdot\mathrm{rev}(x)$.}
+\end{frame}
+
+% ================= Closing =================
+\begin{frame}
+  \centering
+  \vspace{1cm}
+  {\Huge Thank You}\\[1cm]
+\end{frame}
+
+\end{document}
